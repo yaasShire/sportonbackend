@@ -18,6 +18,7 @@ import com.sporton.SportOn.repository.VenueRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,8 +32,10 @@ import java.util.UUID;
 public class AWSS3Service {
     private final String sportOnVenueImages = "sportonvenueimages"; // Replace with your S3 bucket name
     private final String facilityIcon = "facilityicons";
-    private final String accessKey = "AKIA6GBMBODXYPAAOU35"; // Replace with your AWS access key
-    private final String secretKey = "6un/OnXsVIg85OeX1vz5BRZVgaImJqKYvrIToo9D"; // Replace with your AWS secret key
+    @Value("${accessKey}")
+    private  String accessKey; // Replace with your AWS access key
+    @Value("${secretKey}")
+    private  String secretKey; // Replace with your AWS secret key
     private final Regions region = Regions.EU_NORTH_1; // Specify your AWS region
     @Autowired
     private VenueRepository venueRepository;

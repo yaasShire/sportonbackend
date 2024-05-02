@@ -8,6 +8,7 @@ import com.sporton.SportOn.repository.*;
 import com.sporton.SportOn.service.aswS3Service.AWSS3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,8 @@ public class VenueServiceImpl implements VenueService{
     private final SearchHistoryRepository searchHistoryRepository;
     private final AWSS3Service awss3Service;
     private final FacilityRepository facilityRepository;
+
+
 
     @Override
     public VenueResponseModel createVenue(VenueCreateRequestModel body, String phoneNumber, List<MultipartFile> images) throws VenueException {

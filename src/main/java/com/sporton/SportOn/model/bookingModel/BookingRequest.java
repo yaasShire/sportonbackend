@@ -13,7 +13,7 @@ public class BookingRequest {
     private Long courtId;
     private Long providerId;
     private Long timeSlotId;
-    private LocalDate bookingDate;
+    private LocalDate matchDate;
     private Double totalPrice;
     private BookingStatus status;
 }

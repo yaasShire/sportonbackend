@@ -9,6 +9,7 @@ import com.sporton.SportOn.model.courtModel.CourtResponseModel;
 import com.sporton.SportOn.repository.CourtRepository;
 import com.sporton.SportOn.repository.VenueRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CourtServiceImpl implements CourtService{
     private final CourtRepository courtRepository;
     private final VenueRepository venueRepository;
@@ -96,6 +98,7 @@ public class CourtServiceImpl implements CourtService{
         try {
             Optional<Court> optionalCourt = courtRepository.findById(courtId);
             if (optionalCourt.isPresent()){
+                log.info("inside court update data {}", body);
                 optionalCourt.get().setName(body.getName());
                 optionalCourt.get().setHeight(body.getHeight());
                 optionalCourt.get().setWidth(body.getWidth());
@@ -104,6 +107,7 @@ public class CourtServiceImpl implements CourtService{
                 optionalCourt.get().setAdditionalInfo(body.getAdditionalInfo());
                 optionalCourt.get().setActivePlayersPerTeam(body.getActivePlayersPerTeam());
                 courtRepository.save(optionalCourt.get());
+                log.info("updated court {}", optionalCourt.get());
                 return  CourtResponseModel.builder()
                         .status(HttpStatus.OK)
                         .message("Court Updated Successfully")

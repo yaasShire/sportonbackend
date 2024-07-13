@@ -1,9 +1,6 @@
 package com.sporton.SportOn.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -28,9 +25,14 @@ public class Booking {
     @NonNull
     private Long timeSlotId;
     @NonNull
-    private LocalDate bookingDate;
+    private LocalDate bookingDate = LocalDate.now();
+    private LocalDate matchDate = LocalDate.now();
     @NonNull
     private Double totalPrice;
     @NonNull
     private BookingStatus status;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "venue_id")
+    private Venue venue;
 }

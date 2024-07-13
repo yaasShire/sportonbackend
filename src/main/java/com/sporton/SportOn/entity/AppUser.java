@@ -36,6 +36,10 @@ public class AppUser implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
     private String profileImage;
+    private Boolean approved=false;
+
+    @OneToMany(mappedBy = "user")
+    private List<Subscription> subscriptions;
 //    @ManyToMany
 //    @JoinTable(
 //            name = "user_venue_favorite",
@@ -82,5 +86,9 @@ public class AppUser implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public boolean isSubscribed() {
+        return subscriptions.stream().anyMatch(Subscription::isActive);
     }
 }

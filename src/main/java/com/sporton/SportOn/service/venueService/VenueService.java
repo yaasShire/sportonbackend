@@ -34,4 +34,6 @@ public interface VenueService {
     List<SearchHistory> getSavedSearchVenues(GetSavedSearchVenuesModel body) throws VenueException;
 
     CommonResponseModel isVenueFavoritedByUser(String phoneNumber, Long venueId) throws VenueException;
+
+    CommonResponseModel getNumberOfVenues(String phoneNumber) throws VenueException;
 }

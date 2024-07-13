@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +31,6 @@ public class VenueServiceImpl implements VenueService{
     private final SearchHistoryRepository searchHistoryRepository;
     private final AWSS3Service awss3Service;
     private final FacilityRepository facilityRepository;
-
 
 
     @Override
@@ -202,25 +202,48 @@ public class VenueServiceImpl implements VenueService{
     public List<Venue> getSingleProviderVenues(String phoneNumber, int page, int size) throws VenueException {
         try {
             Optional<AppUser> optionalAppUser = appUserRepository.findByPhoneNumber(phoneNumber);
-            if (optionalAppUser.isPresent()){
-                if (optionalAppUser.get().getRole()==Role.PROVIDER || optionalAppUser.get().getRole()==Role.ADMIN) {
+            if (optionalAppUser.isPresent()) {
+                AppUser user = optionalAppUser.get();
+                if (user.getRole() == Role.PROVIDER || user.getRole() == Role.ADMIN) {
                     PageRequest pageRequest = PageRequest.of(page, size);
-                    Optional<Page<Venue>> optionalVenues = Optional.of(venueRepository.findByProviderId(optionalAppUser.get().getId(), pageRequest));
-                    if (optionalVenues.isPresent()){
-                        return optionalVenues.get().getContent();
-                    }else {
-                        throw new VenueException("There is no venues for this user", HttpStatus.NOT_FOUND);
+                    Page<Venue> venuesPage = venueRepository.findByProviderId(user.getId(), pageRequest);
+                    if (venuesPage.hasContent()) {
+                        return venuesPage.getContent();
+                    } else {
+                        throw new VenueException("There are no venues for this user", HttpStatus.NOT_FOUND);
                     }
+                } else {
+                    throw new VenueException("You don't have permission to access this endpoint", HttpStatus.BAD_REQUEST);
                 }
-                else {
-                    throw new VenueException("You don't have permission to access this end point", HttpStatus.BAD_REQUEST);
-                }
-            }else {
+            } else {
                 throw new VenueException("User does not exist", HttpStatus.BAD_REQUEST);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new VenueException(e.getMessage());
         }
+    }
+
+    private VenueDTO mapToVenueDTO(Venue venue) {
+//        log.info("target venue ---> {}", venue.toString());
+        String image = venue.getImages().isEmpty() ? null : venue.getImages().get(0);
+        return new VenueDTO(
+                venue.getId(),
+                venue.getProviderId(),
+                venue.getName(),
+                venue.getAddress(),
+                venue.getCity(),
+                venue.getDescription(),
+                venue.getPhoneNumber(),
+                venue.getEmail(),
+                venue.getNumberOfHoursOpen(),
+                venue.getLatitude(),
+                venue.getLongitude(),
+                venue.getNumberOfCourts(),
+                venue.getOpenTime(),
+                venue.getCloseTime(),
+                image,
+                venue.getFacilities()
+        );
     }
 
     @Override
@@ -334,4 +357,25 @@ public class VenueServiceImpl implements VenueService{
 
         }
     }
+
+    @Override
+    public CommonResponseModel getNumberOfVenues(String phoneNumber) throws VenueException {
+        try {
+            Optional<AppUser> optionalAppUser = appUserRepository.findByPhoneNumber(phoneNumber);
+            if (optionalAppUser.isEmpty()) {
+                throw new VenueException("User not found");
+            }
+
+            long venueCount = venueRepository.countByProviderId(optionalAppUser.get().getId());
+
+            return CommonResponseModel.builder()
+                    .status(HttpStatus.OK)
+                    .message("Number of venues retrieved successfully")
+                    .data(venueCount)
+                    .build();
+        } catch (Exception e) {
+            throw new VenueException(e.getMessage());
+        }
+    }
+
 }

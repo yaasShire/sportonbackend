@@ -68,7 +68,8 @@ public class Venue {
     )
     private List<AppUser> favoritedUsers = new ArrayList<>();
 
-//    public boolean isFavoritedByUser(AppUser user) {
-//        return user != null && user.getFavoriteVenues().contains(this);
-//    }
+    @JsonBackReference
+    @OneToMany(mappedBy = "venue")
+    private List<Booking> bookings;
+
 }

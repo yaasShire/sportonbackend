@@ -6,6 +6,7 @@ import com.sporton.SportOn.model.courtModel.CourtRequestModel;
 import com.sporton.SportOn.model.courtModel.CourtResponseModel;
 import com.sporton.SportOn.service.courtService.CourtService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/court")
 @RequiredArgsConstructor
+@Slf4j
 public class CourtController {
     private final CourtService courtService;
 
@@ -53,6 +55,7 @@ public class CourtController {
             @RequestBody CourtRequestModel body
     ) throws CommonException {
         try {
+            log.info("court id {}", courtId);
             return courtService.updateCourt(courtId, body);
         }catch (Exception e){
             throw new CommonException(e.getMessage());

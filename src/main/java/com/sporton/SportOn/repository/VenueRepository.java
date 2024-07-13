@@ -13,6 +13,7 @@ import java.util.Optional;
 public interface VenueRepository extends JpaRepository<Venue, Long> {
     Optional<Venue> findByName(String name);
 
+//    @Query("SELECT new com.sporton.SportOn.model.venueModel.VenueDTO(v.id, v.providerId, v.name, v.address, v.city, v.description, v.phoneNumber, v.email, v.numberOfHoursOpen, v.latitude, v.longitude, v.numberOfCourts, v.openTime, v.closeTime, v.facilities) FROM Venue v WHERE v.id = :id")
     Page<Venue> findByProviderId(Long id, PageRequest pageRequest);
 
     @Query("SELECT v FROM Venue v WHERE " +
@@ -24,4 +25,6 @@ public interface VenueRepository extends JpaRepository<Venue, Long> {
     List<Venue> findPopularVenues(PageRequest pageRequest);
 
     List<Venue> findByNameContainingIgnoreCase(String name);
+
+    long countByProviderId(Long providerId);
 }

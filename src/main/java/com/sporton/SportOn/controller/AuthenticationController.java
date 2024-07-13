@@ -2,6 +2,8 @@ package com.sporton.SportOn.controller;
 
 import com.sporton.SportOn.configuration.JWTService;
 import com.sporton.SportOn.entity.AppUser;
+import com.sporton.SportOn.entity.Subscription;
+import com.sporton.SportOn.entity.SubscriptionType;
 import com.sporton.SportOn.exception.authenticationException.AuthenticationException;
 import com.sporton.SportOn.model.CommonResponseModel;
 import com.sporton.SportOn.model.authenticationModel.*;
@@ -38,9 +40,21 @@ public class AuthenticationController {
     ) throws AuthenticationException {
         return authenticateService.singInAsCustomer(body);
     }
+
+    @PostMapping("/singInAsProvider")
+    public SignInResponseModel singInAsProvider(
+            @RequestBody SignInRequestModel body
+    ) throws AuthenticationException {
+        return authenticateService.singInAsProvider(body);
+    }
     @PostMapping("/requestForgetPasswordOTP")
     public OTPResponseModel forgetPasswordVerificationPhoneNumber(@RequestBody RequestForgetPasswordOTP phoneNumber) throws AuthenticationException {
         return authenticateService.sendForgetPasswordOTP(phoneNumber);
+    }
+
+    @PostMapping("/userRequestForgetPasswordOTP")
+    public OTPResponseModel userForgetPasswordVerificationPhoneNumber(@RequestBody RequestForgetPasswordOTP phoneNumber) throws AuthenticationException {
+        return authenticateService.sendUserForgetPasswordOTP(phoneNumber);
     }
 
     @PostMapping("/verifyForgetPasswordOTP")
@@ -92,4 +106,128 @@ public class AuthenticationController {
             throw new AuthenticationException(e.getMessage());
         }
     }
+
+    @PutMapping("/uploadProfileImage")
+    public CommonResponseModel uploadProfileImage(
+            @RequestParam("file") MultipartFile file,
+            @RequestHeader("Authorization") String authorizationHeader
+    ) throws AuthenticationException {
+        try {
+            String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+            String phoneNumber = jwtService.extractUsername(token);
+            return authenticateService.uploadProfileImage(file, phoneNumber);
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
+    @GetMapping("/getTotalNumberOfProviders")
+    public CommonResponseModel getTotalNumberOfProviders(
+            @RequestHeader("Authorization") String authorizationHeader
+    ) throws AuthenticationException {
+        try {
+            String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+            String phoneNumber = jwtService.extractUsername(token);
+            return authenticateService.getTotalNumberOfProviders(phoneNumber);
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
+    @GetMapping("/getTotalNumberOfSubscribedProviders")
+    public CommonResponseModel getTotalNumberOfSubscribedProviders(
+            @RequestHeader("Authorization") String authorizationHeader
+    ) throws AuthenticationException {
+        try {
+            String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+            String phoneNumber = jwtService.extractUsername(token);
+            return authenticateService.getTotalNumberOfSubscribedProviders(phoneNumber);
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
+    @GetMapping("/getTotalNumberOfUnSubscribedProviders")
+    public CommonResponseModel getTotalNumberOfUnSubscribedProviders(
+            @RequestHeader("Authorization") String authorizationHeader
+    ) throws AuthenticationException {
+        try {
+            String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+            String phoneNumber = jwtService.extractUsername(token);
+            return authenticateService.getTotalNumberOfUnSubscribedProviders(phoneNumber);
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
+    @GetMapping("/isUserSubscribed")
+    public CommonResponseModel isUserSubscribed(
+            @RequestHeader("Authorization") String authorizationHeader
+    ) throws AuthenticationException {
+        try {
+            String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+            String phoneNumber = jwtService.extractUsername(token);
+            return authenticateService.isUserSubscribed(phoneNumber);
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
+
+    @PostMapping("/providerSubscribe")
+    public Subscription subscribeUser(
+            @RequestBody SubscriptionModal body,
+            @RequestHeader("Authorization") String authorizationHeader
+    ) throws AuthenticationException {
+        try {
+            String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+            String phoneNumber = jwtService.extractUsername(token);
+            return authenticateService.createSubscription(phoneNumber, body);
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
+    @PutMapping("/updateProviderSubscription")
+    public Subscription updateProviderSubscription(
+            @RequestBody SubscriptionModal body,
+            @RequestHeader("Authorization") String authorizationHeader
+    ) throws AuthenticationException {
+        try {
+            String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+            String phoneNumber = jwtService.extractUsername(token);
+            return authenticateService.updateProviderSubscription(phoneNumber, body);
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
+    @GetMapping("/getTotalProvidersSubscriptionIncomeByMonthlyOrYearly")
+    public CommonResponseModel getTotalProvidersSubscriptionIncomeByMonthlyOrYearly(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam SubscriptionType subscriptionType
+    ) throws AuthenticationException {
+        try {
+            String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+            String phoneNumber = jwtService.extractUsername(token);
+            return authenticateService.getTotalProvidersSubscriptionIncomeByMonthlyOrYearly(phoneNumber, subscriptionType);
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
+    @PutMapping("/approveProvider/{providerId}")
+    public CommonResponseModel approveProvider(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Long providerId
+    ) throws AuthenticationException {
+        try {
+            String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+            String phoneNumber = jwtService.extractUsername(token);
+            return authenticateService.approveProvider(phoneNumber, providerId);
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
 }

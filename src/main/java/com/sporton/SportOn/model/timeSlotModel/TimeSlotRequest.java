@@ -17,4 +17,5 @@ public class TimeSlotRequest {
     private LocalTime startTime;
     private LocalTime endTime;
     private Boolean available;
+    private Double price;
 }

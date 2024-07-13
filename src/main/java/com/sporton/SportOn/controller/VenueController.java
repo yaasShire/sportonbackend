@@ -209,4 +209,17 @@ public class VenueController {
         }
     }
 
+    @GetMapping("/getNumberOfVenues")
+    public CommonResponseModel getNumberOfVenues(
+            @RequestHeader("Authorization") String authorizationHeader
+    ) throws VenueException {
+        try {
+            String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+            String phoneNumber = jwtService.extractUsername(token);
+            return venueService.getNumberOfVenues(phoneNumber);
+        }catch (Exception e){
+            throw new VenueException(e.getMessage());
+        }
+    }
+
 }

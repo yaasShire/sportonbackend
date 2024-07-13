@@ -13,4 +13,5 @@ import org.springframework.http.HttpStatus;
 public class CommonResponseModel {
     private HttpStatus status;
     private String message;
+    private Object data;
 }

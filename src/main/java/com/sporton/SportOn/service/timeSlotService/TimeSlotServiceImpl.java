@@ -13,6 +13,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,11 +34,16 @@ public class TimeSlotServiceImpl implements TimeSlotService{
                log.info("value --> {}", optionalTimeSlot.get());
                 if (optionalTimeSlot.get().isEmpty()){
                     log.info("There is no time slot matching this time slot");
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm a");
+//                    LocalTime startTime = LocalTime.parse(body.getStartTime(), formatter);
+//                    LocalTime endTime = LocalTime.parse(body.getEndTime(), formatter);
+log.info("time slot body {}", body);
                     TimeSlot timeSlot = TimeSlot.builder()
                             .courtId(body.getCourtId())
                             .startTime(body.getStartTime())
                             .endTime(body.getEndTime())
                             .available(true)
+                            .price(body.getPrice())
                             .build();
                     timeSlotRepository.save(timeSlot);
                     return CommonResponseModel.builder()
@@ -85,6 +92,7 @@ public class TimeSlotServiceImpl implements TimeSlotService{
                     optionalTimeSlot.get().setStartTime(body.getStartTime());
                     optionalTimeSlot.get().setEndTime(body.getEndTime());
                     optionalTimeSlot.get().setAvailable(body.getAvailable());
+                    optionalTimeSlot.get().setPrice(body.getPrice());
                     timeSlotRepository.save(optionalTimeSlot.get());
                     return CommonResponseModel.builder()
                             .status(HttpStatus.OK)

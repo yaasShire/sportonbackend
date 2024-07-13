@@ -7,13 +7,17 @@ import com.sporton.SportOn.SportOnApplication;
 import com.sporton.SportOn.configuration.JWTService;
 import com.sporton.SportOn.entity.AppUser;
 import com.sporton.SportOn.entity.Role;
+import com.sporton.SportOn.entity.Subscription;
+import com.sporton.SportOn.entity.SubscriptionType;
 import com.sporton.SportOn.entity.token.Token;
 import com.sporton.SportOn.entity.token.TokenType;
 import com.sporton.SportOn.exception.authenticationException.AuthenticationException;
 import com.sporton.SportOn.model.CommonResponseModel;
 import com.sporton.SportOn.model.authenticationModel.*;
 import com.sporton.SportOn.repository.AppUserRepository;
+import com.sporton.SportOn.repository.SubscriptionRepository;
 import com.sporton.SportOn.repository.TokenRepository;
+import com.sporton.SportOn.service.aswS3Service.AWSS3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +25,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.URI;
@@ -34,6 +40,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -47,6 +54,9 @@ public class AuthenticationServiceImpl implements AuthenticateService {
     private final JWTService jwtService;
     private final TokenRepository tokenRepository;
     private final AuthenticationManager authenticationManager;
+    private final AWSS3Service awss3Service;
+    private final SubscriptionRepository subscriptionRepository;
+
     @Autowired
     private JavaMailSender emailSender;
     LocalDateTime generatedTime=LocalDateTime.now();
@@ -276,7 +286,6 @@ public class AuthenticationServiceImpl implements AuthenticateService {
                 }else {
                     throw new AuthenticationException("Old Password Is Not Correct");
                 }
-
             }else {
                 throw new AuthenticationException("No User Found");
             }
@@ -313,6 +322,287 @@ public class AuthenticationServiceImpl implements AuthenticateService {
                     .build();
         }else {
             throw new AuthenticationException("User not found");
+        }
+    }
+
+    @Override
+    public SignInResponseModel singInAsProvider(SignInRequestModel body) throws AuthenticationException {
+        try {
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(body.getPhoneNumber(), body.getPassword()));
+            // User is authenticated, proceed with the request
+            Optional<AppUser> appUser = appUserRepository.findByPhoneNumber(body.getPhoneNumber());
+            if (appUser.isPresent()){
+                if (appUser.get().getRole() != Role.PROVIDER) throw new AuthenticationException("Invalid User");
+                var jwtToken = jwtService.generateToken(appUser.get());
+                var refreshToken = jwtService.generateRefreshToken(appUser.get());
+                revokeAllUserTokens(appUser.get());
+                saveUserToken(appUser.get(), jwtToken);
+                return SignInResponseModel.builder()
+                        .status(HttpStatus.OK)
+                        .message("User successfully loged in")
+                        .accessToken(jwtToken)
+                        .refreshToken(refreshToken)
+                        .id(appUser.get().getId())
+                        .phoneNumber(appUser.get().getPhoneNumber())
+                        .joinedDate(appUser.get().getJoinedDate())
+                        .build();
+            }else {
+                throw new AuthenticationException("User not found");
+            }
+        } catch (Exception e) {
+            // Authentication failed, handle the exception
+            throw new AuthenticationException("Invalid credentials");
+        }
+
+    }
+
+    @Override
+    public OTPResponseModel sendUserForgetPasswordOTP(RequestForgetPasswordOTP body) throws AuthenticationException {
+        if (body.getPhoneNumber() ==null || body.getPhoneNumber().equalsIgnoreCase("")){
+            throw new AuthenticationException("Enter your phone number");
+        }
+        try {
+            Optional<AppUser> appUser = appUserRepository.findByPhoneNumber(body.getPhoneNumber());
+            if (appUser.isPresent()){
+                if (appUser.get().getRole() !=Role.USER) throw new AuthenticationException("User IS NOT VALID", HttpStatus.BAD_REQUEST);
+                log.info("user {} email {}", appUser.get().getPhoneNumber(), appUser.get().getEmail());
+//                sendOTP(body.getPhoneNumber());
+                sendEmailVerification(appUser.get().getEmail());
+                generatedTime=LocalDateTime.now();
+                return OTPResponseModel
+                        .builder()
+                        .message("OTP is sent successfully please verify")
+                        .build();
+            }else{
+                throw new AuthenticationException("User does not exist");
+            }
+        }catch (Exception e){
+            log.info(e.getMessage());
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResponseModel uploadProfileImage(MultipartFile file, String phoneNumber) throws AuthenticationException {
+        try {
+            Optional<AppUser> appUser =  appUserRepository.findByPhoneNumber(phoneNumber);
+            if (!appUser.isPresent()) throw new AuthenticationException("No User Found");
+            appUser.get().setProfileImage(awss3Service.uploadImage(file));
+            appUserRepository.save(appUser.get());
+            return CommonResponseModel.builder()
+                    .status(HttpStatus.OK)
+                    .message("User Profile Image Updated Successfully")
+                    .build();
+
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResponseModel getTotalNumberOfProviders(String phoneNumber) throws AuthenticationException {
+        try {
+            Optional<AppUser> appUser =  appUserRepository.findByPhoneNumber(phoneNumber);
+            if (appUser.isPresent() && appUser.get().getRole()==Role.ADMIN){
+                Long totalNumberOfProviders = appUserRepository.findTotalNumberOfProviders(Role.PROVIDER);
+                return CommonResponseModel.builder()
+                        .status(HttpStatus.OK)
+                        .message("Total Number Of Provider Retrieved Successfully")
+                        .data(totalNumberOfProviders)
+                        .build();
+            }else {
+                throw new AuthenticationException("Invalid User");
+            }
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResponseModel getTotalNumberOfSubscribedProviders(String phoneNumber) throws AuthenticationException {
+        try {
+            AppUser user = appUserRepository.findByPhoneNumber(phoneNumber)
+                    .orElseThrow(() -> new AuthenticationException("User not found"));
+
+            if (user.getRole() != Role.ADMIN) {
+                throw new AuthenticationException("User is not a provider");
+            }
+            long count = appUserRepository.countByRoleAndSubscriptionStatus(Role.PROVIDER);
+            return CommonResponseModel.builder()
+                    .status(HttpStatus.OK)
+                    .message("Total Number Of Subscribed Providers Retrieved Successfully")
+                    .data(count)
+                    .build();
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResponseModel isUserSubscribed(String phoneNumber) throws AuthenticationException {
+        try {
+            Optional<AppUser> appUser =  appUserRepository.findByPhoneNumber(phoneNumber);
+            if (appUser.isPresent() && (appUser.get().getRole() == Role.PROVIDER || appUser.get().getRole() == Role.ADMIN)) {
+                if (appUser.get().isSubscribed() && !appUser.get().getApproved()) {
+                    return CommonResponseModel.builder()
+                            .status(HttpStatus.OK)
+                            .message("User is Subscribed But Not Approved")
+                            .data(appUser.get().isSubscribed())
+                            .build();
+                } else if (appUser.get().isSubscribed() && appUser.get().getApproved()) {
+                    return CommonResponseModel.builder()
+                            .status(HttpStatus.OK)
+                            .message("User is Subscribed And Approved")
+                            .data(appUser.get().isSubscribed())
+                            .build();
+                } else if (appUser.get().isSubscribed()) {
+                    return CommonResponseModel.builder()
+                            .status(HttpStatus.OK)
+                            .message("User is Subscribed And Approved")
+                            .data(appUser.get().isSubscribed())
+                            .build();
+                }
+                return CommonResponseModel.builder()
+                        .status(HttpStatus.OK)
+                        .message("User subscription result retrieved successfully")
+                        .data(appUser.get().isSubscribed())
+                        .build();
+            }else {
+                throw new AuthenticationException("Invalid User");
+            }
+
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
+    @Override
+    public Subscription createSubscription(String phoneNumber, SubscriptionModal body) throws AuthenticationException {
+        final double defaultMonthlyPrice = 40.0;
+        final double defaultYearlyPrice = 300.0;
+        try {
+            AppUser user = appUserRepository.findByPhoneNumber(phoneNumber)
+                    .orElseThrow(() -> new AuthenticationException("User not found"));
+
+            if (user.getRole() != Role.PROVIDER) {
+                throw new AuthenticationException("User is not a provider");
+            }
+
+            Optional<Subscription> existingSubscription = subscriptionRepository.findActiveSubscriptionByUserId(user.getId());
+            if (existingSubscription.isPresent()) {
+                throw new AuthenticationException("User already has an active subscription");
+            }
+
+            LocalDate startDate = LocalDate.now();
+            LocalDate endDate = body.getSubscriptionType() == SubscriptionType.MONTHLY ? startDate.plusMonths(1) : startDate.plusYears(1);
+            double subscriptionPrice = body.getPrice() != null ? body.getPrice() : (body.getSubscriptionType() == SubscriptionType.MONTHLY ? defaultMonthlyPrice : defaultYearlyPrice);
+
+            Subscription subscription = Subscription.builder()
+                    .user(user)
+                    .subscriptionType(body.getSubscriptionType())
+                    .startDate(startDate)
+                    .endDate(endDate)
+                    .price(subscriptionPrice)
+                    .build();
+            return subscriptionRepository.save(subscription);
+        } catch (Exception e) {
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResponseModel getTotalNumberOfUnSubscribedProviders(String phoneNumber) throws AuthenticationException {
+        try {
+            AppUser user = appUserRepository.findByPhoneNumber(phoneNumber)
+                    .orElseThrow(() -> new AuthenticationException("User not found"));
+
+            if (user.getRole() != Role.ADMIN) {
+                throw new AuthenticationException("User is not a provider");
+            }
+
+            long count = appUserRepository.countByRoleAndUnsubscriptionStatus(Role.PROVIDER);
+            return CommonResponseModel.builder()
+                    .status(HttpStatus.OK)
+                    .message("Total Number Of UnSubscribed Providers Retrieved Successfully")
+                    .data(count)
+                    .build();
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
+    @Override
+    public Subscription updateProviderSubscription(String phoneNumber, SubscriptionModal body) throws AuthenticationException {
+        final double defaultMonthlyPrice = 40.0;
+        final double defaultYearlyPrice = 300.0;
+
+        try {
+            AppUser user = appUserRepository.findByPhoneNumber(phoneNumber)
+                    .orElseThrow(() -> new AuthenticationException("User not found"));
+
+            if (user.getRole() != Role.PROVIDER) {
+                throw new AuthenticationException("User is not a provider");
+            }
+
+            Optional<Subscription> existingSubscription = subscriptionRepository.findActiveSubscriptionByUserId(user.getId());
+            if (existingSubscription.isEmpty()) {
+                throw new AuthenticationException("User does not have an active subscription");
+            }
+
+            Subscription subscription = existingSubscription.get();
+            subscription.setSubscriptionType(body.getSubscriptionType());
+            LocalDate endDate = body.getSubscriptionType() == SubscriptionType.MONTHLY ? LocalDate.now().plusMonths(1) : LocalDate.now().plusYears(1);
+            subscription.setEndDate(endDate);
+
+            double subscriptionPrice = body.getPrice() != null ? body.getPrice() : (body.getSubscriptionType() == SubscriptionType.MONTHLY ? defaultMonthlyPrice : defaultYearlyPrice);
+            subscription.setPrice(subscriptionPrice);
+
+            return subscriptionRepository.save(subscription);
+        } catch (Exception e) {
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResponseModel getTotalProvidersSubscriptionIncomeByMonthlyOrYearly(String phoneNumber, SubscriptionType subscriptionType) throws AuthenticationException {
+        try {
+            AppUser user = appUserRepository.findByPhoneNumber(phoneNumber)
+                    .orElseThrow(() -> new AuthenticationException("User not found"));
+
+            // Assuming only an admin can access this information
+            if (!user.getRole().equals(Role.ADMIN)) {
+                throw new AuthenticationException("User does not have the required role to access this information");
+            }
+
+            List<Subscription> subscriptions = subscriptionRepository.findBySubscriptionTypeAndUserRole(subscriptionType, Role.PROVIDER);
+            double totalIncome = subscriptions.stream()
+                    .mapToDouble(Subscription::getPrice)
+                    .sum();
+
+            return CommonResponseModel.builder()
+                    .status(HttpStatus.OK)
+                    .message("Total Provider Subscription Income Retrieved Successfully")
+                    .data(totalIncome)
+                    .build();
+        } catch (Exception e) {
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResponseModel approveProvider(String phoneNumber, Long providerId) throws AuthenticationException {
+        try {
+            Optional<AppUser> appUser =  appUserRepository.findAppUserById(providerId);
+            if (!appUser.isPresent()) throw new AuthenticationException("No User Found");
+            if (appUser.get().getApproved() !=null && appUser.get().getApproved()) throw new AuthenticationException("User is already approved", HttpStatus.OK);
+            appUser.get().setApproved(true);
+            appUserRepository.save(appUser.get());
+            return CommonResponseModel.builder()
+                    .status(HttpStatus.OK)
+                    .message("Provider Approved Successfully")
+                    .build();
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
         }
     }
 
@@ -423,6 +713,20 @@ public class AuthenticationServiceImpl implements AuthenticateService {
         LocalDateTime expirationTime = generatedTime.plusMinutes(EXPIRATION_TIME_IN_MINUTES);
         LocalDateTime now = LocalDateTime.now();
         return now.isBefore(expirationTime);
+    }
+
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void checkSubscriptions() {
+        List<AppUser> users = appUserRepository.findByRole(Role.PROVIDER);
+        for (AppUser user : users) {
+            boolean anyActiveSubscription = user.getSubscriptions().stream()
+                    .anyMatch(Subscription::isActive);
+
+            if (!anyActiveSubscription && user.getApproved()) {
+                user.setApproved(false);
+                appUserRepository.save(user);
+            }
+        }
     }
 
 }

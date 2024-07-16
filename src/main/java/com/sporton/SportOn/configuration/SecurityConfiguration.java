@@ -102,6 +102,7 @@ public class SecurityConfiguration {
         .requestMatchers(HttpMethod.PUT, "/api/v1/authenticate/updateProviderSubscription").hasAnyAuthority(PROVIDER_UPDATE.getPermission(), ADMIN_UPDATE.getPermission())
         .requestMatchers(HttpMethod.GET, "/api/v1/authenticate/getTotalProvidersSubscriptionIncomeByMonthlyOrYearly").hasAnyAuthority(ADMIN_READ.getPermission())
             .requestMatchers(HttpMethod.PUT, "/api/v1/authenticate/approveProvider/**").hasAnyAuthority(ADMIN_UPDATE.getPermission())
+            .requestMatchers(HttpMethod.GET, "/api/v1/authenticate/getAllProviders").hasAnyAuthority(ADMIN_READ.getPermission())
 
 
         .anyRequest()

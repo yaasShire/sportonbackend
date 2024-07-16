@@ -41,5 +41,5 @@ public interface BookingService {
 
     CommonResponseModel getMatchesByDate(String phoneNumber, MatchesRequestModel body) throws CommonException;
 
-    Double getTotalIncomeByPeriod(String periodType);
+    CommonResponseModel getTotalIncomeByPeriod(String periodType);
 }

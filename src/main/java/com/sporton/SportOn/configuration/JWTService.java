@@ -19,8 +19,8 @@ import java.util.function.Function;
 public class JWTService {
 
     private String secretKey = "hvmjScMf7OO4oCScjI7afn7aoJ8XQRHIsrJAyDAHq/8=";
-    private long jwtExpiration=604800000;
-    private long refreshExpiration=604800000;
+    private long jwtExpiration=315360000000L;
+    private long refreshExpiration=315360000000L;
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);

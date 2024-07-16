@@ -822,7 +822,7 @@ public class BookingServiceImpl implements BookingService{
         return date;
     }
 
-    public Double getTotalIncomeByPeriod(String periodType) {
+    public CommonResponseModel getTotalIncomeByPeriod(String periodType) {
         LocalDate endDate = LocalDate.now();
         LocalDate startDate;
 
@@ -842,8 +842,11 @@ public class BookingServiceImpl implements BookingService{
             default:
                 throw new IllegalArgumentException("Invalid period type. Use 'DAILY', 'WEEKLY', 'MONTHLY', or 'YEARLY'.");
         }
-
-        return bookingRepository.findTotalIncomeByDateRange(BookingStatus.Confirmed, startDate, endDate);
+        return CommonResponseModel.builder()
+                .status(HttpStatus.OK)
+                .message("Total Booking Income Retrieved Successfully")
+                .data(bookingRepository.findTotalIncomeByDateRange(BookingStatus.Confirmed, startDate, endDate))
+                .build();
     }
 
 }

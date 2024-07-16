@@ -51,4 +51,6 @@ public interface AuthenticateService {
     CommonResponseModel getTotalProvidersSubscriptionIncomeByMonthlyOrYearly(String phoneNumber, SubscriptionType subscriptionType) throws AuthenticationException;
 
     CommonResponseModel approveProvider(String phoneNumber, Long providerId) throws AuthenticationException;
+
+    CommonResponseModel getAllProviders(String phoneNumber) throws AuthenticationException;
 }

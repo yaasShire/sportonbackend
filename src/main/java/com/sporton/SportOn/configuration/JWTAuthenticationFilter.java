@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import javax.security.sasl.AuthenticationException;
 import java.io.IOException;
 
 @Component
@@ -60,6 +61,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 );
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
+        }else {
+            throw new AuthenticationException("User Not Found");
         }
         filterChain.doFilter(request, response);
     }

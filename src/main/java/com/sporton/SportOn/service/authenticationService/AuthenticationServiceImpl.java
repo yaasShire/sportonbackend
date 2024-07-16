@@ -607,6 +607,21 @@ public class AuthenticationServiceImpl implements AuthenticateService {
     }
 
     @Override
+    public CommonResponseModel getAllProviders(String phoneNumber) throws AuthenticationException {
+        try {
+            Optional<List<AppUser>> providers = Optional.ofNullable(appUserRepository.findByRole(Role.PROVIDER));
+            if (providers.isEmpty()) throw new AuthenticationException("No Providers Found");
+            return CommonResponseModel.builder()
+                    .status(HttpStatus.OK)
+                    .message("List Of All Providers Retrieved Successfully")
+                    .data(providers)
+                    .build();
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
+    @Override
     public ForgetPasswordResponse updatePassword(ChangePasswordCredentials changePasswordCredentials) throws AuthenticationException {
         try {
             Optional<AppUser> appUser = appUserRepository.findByPhoneNumber(changePasswordCredentials.getPhoneNumber());

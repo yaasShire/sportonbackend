@@ -230,4 +230,16 @@ public class AuthenticationController {
         }
     }
 
+    @GetMapping("/getAllProviders")
+    public CommonResponseModel getAllProviders(
+            @RequestHeader("Authorization") String authorizationHeader
+    ) throws AuthenticationException {
+        try {
+            String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+            String phoneNumber = jwtService.extractUsername(token);
+            return authenticateService.getAllProviders(phoneNumber);
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
 }

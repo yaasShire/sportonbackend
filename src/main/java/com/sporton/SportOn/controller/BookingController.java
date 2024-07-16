@@ -219,7 +219,7 @@ public class BookingController {
     }
 
     @GetMapping("/income")
-    public Double getTotalIncomeByPeriod(@RequestParam String periodType) throws CommonException {
+    public CommonResponseModel getTotalIncomeByPeriod(@RequestParam String periodType) throws CommonException {
         try {
             return bookingService.getTotalIncomeByPeriod(periodType);
         }catch (Exception e){

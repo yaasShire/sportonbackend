@@ -1,27 +1,28 @@
-version: "3.8"
-
 services:
-  psql-db:
+  postgres:
+    container_name: pg_sql
     image: postgres
-    container_name: psql-db
-    restart: always
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=123456
-      - POSTGRES_DB=Dockerize
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: sportOnDB
+      POSTGRES_DATA: /data/postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - sporton_db:/var/lib/postgresql/data
+    restart: unless-stopped
 
-  dockerize:
-#    image: yusufshire/sporton:3
-    container_name: dockerize_app
+  sporton:
+    container_name: sport_on_app
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - '8081:8080'
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://psql-db:5432/Dockerize
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=123456
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - 8084:8089
     depends_on:
-      - psql-db
+      - postgres
+
+volumes:
+  sporton_db:
+    driver: local

@@ -34,4 +34,6 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     Optional<Subscription> findActiveSubscriptionByUserId(@Param("userId") Long userId);
 
     List<AppUser> findByRole(Role role);
+
+    Optional<AppUser> findByIdAndRole(Long providerId, Role role);
 }

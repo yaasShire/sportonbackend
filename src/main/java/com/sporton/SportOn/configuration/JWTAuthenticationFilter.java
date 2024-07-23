@@ -60,6 +60,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                         new WebAuthenticationDetailsSource().buildDetails(request)
                 );
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+            }else {
+                throw new AuthenticationException("Token Is Not Valid");
             }
         }else {
             throw new AuthenticationException("User Not Found");

@@ -53,4 +53,6 @@ public interface AuthenticateService {
     CommonResponseModel approveProvider(String phoneNumber, Long providerId) throws AuthenticationException;
 
     CommonResponseModel getAllProviders(String phoneNumber) throws AuthenticationException;
+
+    CommonResponseModel editProviderBySuperAdmin(String phoneNumber, SignUpRequestModel body, Long providerId) throws AuthenticationException;
 }

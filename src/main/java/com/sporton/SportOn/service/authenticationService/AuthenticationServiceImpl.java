@@ -102,6 +102,7 @@ public class AuthenticationServiceImpl implements AuthenticateService {
                         .password(passwordEncoder.encode(body.getPassword()))
                         .joinedDate(getCurrentDate())
                         .role(body.getRole())
+                        .approved(false)
                         .build();
                 OTPResponseModel response = OTPResponseModel.builder()
                         .message("OTP is sent, verify")
@@ -594,7 +595,14 @@ public class AuthenticationServiceImpl implements AuthenticateService {
         try {
             Optional<AppUser> appUser =  appUserRepository.findAppUserById(providerId);
             if (!appUser.isPresent()) throw new AuthenticationException("No User Found");
-            if (appUser.get().getApproved() !=null && appUser.get().getApproved()) throw new AuthenticationException("User is already approved", HttpStatus.OK);
+            if (appUser.get().getApproved() !=null && appUser.get().getApproved()){
+                appUser.get().setApproved(false);
+                appUserRepository.save(appUser.get());
+                return CommonResponseModel.builder()
+                        .status(HttpStatus.OK)
+                        .message("Provider Is Un Approved Successfully")
+                        .build();
+            };
             appUser.get().setApproved(true);
             appUserRepository.save(appUser.get());
             return CommonResponseModel.builder()
@@ -616,6 +624,34 @@ public class AuthenticationServiceImpl implements AuthenticateService {
                     .message("List Of All Providers Retrieved Successfully")
                     .data(providers)
                     .build();
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResponseModel editProviderBySuperAdmin(String phoneNumber, SignUpRequestModel body, Long providerId) throws AuthenticationException {
+        try {
+            Optional<AppUser> appUser = appUserRepository.findByIdAndRole(providerId, Role.PROVIDER);
+            if (appUser.isEmpty()) throw new AuthenticationException("No User Found");
+            if (body.getEmail()!=null){
+                appUser.get().setEmail(body.getEmail());
+            }
+            if (body.getPhoneNumber()!=null){
+                appUser.get().setPhoneNumber(body.getPhoneNumber());
+            }
+            if (body.getFullName()!=null){
+                appUser.get().setFullName(body.getFullName());
+            }
+            if (body.getPassword()!=null){
+                appUser.get().setPassword(passwordEncoder.encode(body.getPassword()));
+            }
+            appUserRepository.save(appUser.get());
+            return CommonResponseModel.builder()
+                    .status(HttpStatus.OK)
+                    .message("User Updated Successfully")
+                    .build();
+
         }catch (Exception e){
             throw new AuthenticationException(e.getMessage());
         }

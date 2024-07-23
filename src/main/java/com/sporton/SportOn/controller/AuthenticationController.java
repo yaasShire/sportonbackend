@@ -242,4 +242,20 @@ public class AuthenticationController {
             throw new AuthenticationException(e.getMessage());
         }
     }
+
+    @PutMapping("/editProviderBySuperAdmin/{providerId}")
+    public CommonResponseModel editProviderBySuperAdmin(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Long providerId,
+            @RequestBody SignUpRequestModel body
+    ) throws AuthenticationException {
+        try {
+            String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+            String phoneNumber = jwtService.extractUsername(token);
+            return authenticateService.editProviderBySuperAdmin(phoneNumber, body, providerId);
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
 }

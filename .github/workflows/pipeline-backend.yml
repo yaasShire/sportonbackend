@@ -24,8 +24,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'openjdk'
-
+          distribution: 'corretto'
       - name: Running Unit Tests
         run: |
 #          cd book-network
@@ -43,7 +42,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'openjdk'
+          distribution: 'corretto'
 
       - name: Running Unit Tests
         run: |
@@ -63,7 +62,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'openjdk'
+          distribution: 'corretto'
 
       - name: Compile project
         run: |
@@ -79,7 +78,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: '17'
-          distribution: 'openjdk'
+          distribution: 'corretto'
       - name: Extract project version
         id: extract_version
         run: |

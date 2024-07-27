@@ -38,6 +38,7 @@ public class AppUser implements UserDetails {
     private String profileImage;
     private Boolean approved=false;
 
+@JsonBackReference
     @OneToMany(mappedBy = "user")
     private List<Subscription> subscriptions;
 //    @ManyToMany

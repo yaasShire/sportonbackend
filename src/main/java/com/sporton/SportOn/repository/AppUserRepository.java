@@ -36,4 +36,7 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     List<AppUser> findByRole(Role role);
 
     Optional<AppUser> findByIdAndRole(Long providerId, Role role);
+
+    @Query("SELECT COUNT(u) FROM AppUser u WHERE u.role = :role")
+    Long findTotalNumberOfCustomers(Role role);
 }

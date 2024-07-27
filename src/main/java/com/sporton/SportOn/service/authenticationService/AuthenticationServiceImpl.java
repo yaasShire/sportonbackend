@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 
 import com.sporton.SportOn.SportOnApplication;
 import com.sporton.SportOn.configuration.JWTService;
+import com.sporton.SportOn.dto.UserSubscriptionDTO;
 import com.sporton.SportOn.entity.AppUser;
 import com.sporton.SportOn.entity.Role;
 import com.sporton.SportOn.entity.Subscription;
@@ -14,6 +15,7 @@ import com.sporton.SportOn.entity.token.TokenType;
 import com.sporton.SportOn.exception.authenticationException.AuthenticationException;
 import com.sporton.SportOn.model.CommonResponseModel;
 import com.sporton.SportOn.model.authenticationModel.*;
+import com.sporton.SportOn.model.bookingModel.ProviderOrderResponseDTO;
 import com.sporton.SportOn.repository.AppUserRepository;
 import com.sporton.SportOn.repository.SubscriptionRepository;
 import com.sporton.SportOn.repository.TokenRepository;
@@ -43,6 +45,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -656,6 +659,105 @@ public class AuthenticationServiceImpl implements AuthenticateService {
             throw new AuthenticationException(e.getMessage());
         }
     }
+
+    @Override
+    public CommonResponseModel getTotalNumberOfCustomers(String phoneNumber) throws AuthenticationException {
+        try {
+            Optional<AppUser> appUser =  appUserRepository.findByPhoneNumber(phoneNumber);
+            if (appUser.isPresent() && appUser.get().getRole()==Role.ADMIN){
+                Long totalNumberOfProviders = appUserRepository.findTotalNumberOfCustomers(Role.USER);
+                return CommonResponseModel.builder()
+                        .status(HttpStatus.OK)
+                        .message("Total Number Of Customers Retrieved Successfully")
+                        .data(totalNumberOfProviders)
+                        .build();
+            }else {
+                throw new AuthenticationException("Invalid User");
+            }
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResponseModel getAllProvidersSubscriptions(String phoneNumber) throws AuthenticationException {
+        try {
+            Optional<AppUser> user = appUserRepository.findByPhoneNumber(phoneNumber);
+            if (user.isEmpty()) throw new AuthenticationException("User Does Not Exist");
+            Optional<List<Subscription>> optionalSubscriptions = Optional.of(subscriptionRepository.findAll());
+
+            List<UserSubscriptionDTO> providerOrderResponseDTOs = optionalSubscriptions.get().stream().map(subscription -> {
+                return UserSubscriptionDTO
+                        .builder()
+                        .userId(subscription.getUser().getId())
+                        .price(subscription.getPrice())
+                        .userName(subscription.getUser().getFullName())
+                        .phoneNumber(subscription.getUser().getPhoneNumber())
+                        .subscriptionType(subscription.getSubscriptionType())
+                        .startDate(subscription.getStartDate())
+                        .endDate(subscription.getEndDate())
+                        .subscribed(subscription.isActive())
+                        .build();
+            }).collect(Collectors.toList());
+
+            return CommonResponseModel.builder()
+                    .status(HttpStatus.OK)
+                    .message("Subscriptions List Retrieved Successfully")
+                    .data(providerOrderResponseDTOs)
+                    .build();
+
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResponseModel getProviderById(String phoneNumber, Long providerId) throws AuthenticationException {
+        try {
+            Optional<AppUser> user = appUserRepository.findByPhoneNumber(phoneNumber);
+            if (user.isEmpty()) throw new AuthenticationException("User Does Not Exist");
+            Optional<AppUser> providerUser = appUserRepository.findAppUserById(providerId);
+            if (providerUser.isEmpty()) throw new AuthenticationException("No Provider User Found For This Id "+ providerId);
+            if (providerUser.get().getRole() != Role.PROVIDER) throw new AuthenticationException("This Is Not Provider");
+            return CommonResponseModel.builder()
+                    .status(HttpStatus.OK)
+                    .message("Provider Data Retrieved Successfully")
+                    .data(providerUser.get())
+                    .build();
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResponseModel getAllCustomers(String phoneNumber) throws AuthenticationException {
+        try {
+            Optional<List<AppUser>> providers = Optional.ofNullable(appUserRepository.findByRole(Role.USER));
+            if (providers.isEmpty()) throw new AuthenticationException("No Customers Found");
+            return CommonResponseModel.builder()
+                    .status(HttpStatus.OK)
+                    .message("List Of All Customers Retrieved Successfully")
+                    .data(providers)
+                    .build();
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
+//    private UserSubscriptionDTO mapToUserSubscriptionDTO(Subscription subscription) {
+//        String userName = getUserNameById(subscription.getUserId()); // Assume a method to fetch user name
+//        String phoneNumber = getUserPhoneNumberById(subscription.getUserId()); // Assume a method to fetch phone number
+//
+//        return new UserSubscriptionDTO(
+//                userName,
+//                phoneNumber,
+//                subscription.getUserId(),
+//                subscription.getType(),
+//                subscription.getStartDate(),
+//                subscription.getEndDate(),
+//                subscription.getPrice()
+//        );
+//    }
 
     @Override
     public ForgetPasswordResponse updatePassword(ChangePasswordCredentials changePasswordCredentials) throws AuthenticationException {

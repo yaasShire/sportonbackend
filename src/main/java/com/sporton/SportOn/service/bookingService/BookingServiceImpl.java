@@ -1,5 +1,7 @@
 package com.sporton.SportOn.service.bookingService;
 
+import com.sporton.SportOn.dto.MonthlyIncome;
+import com.sporton.SportOn.dto.MonthlyIncomeDTO;
 import com.sporton.SportOn.entity.*;
 import com.sporton.SportOn.exception.commonException.CommonException;
 import com.sporton.SportOn.model.CommonResponseModel;
@@ -12,10 +14,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -847,6 +853,51 @@ public class BookingServiceImpl implements BookingService{
                 .message("Total Booking Income Retrieved Successfully")
                 .data(bookingRepository.findTotalIncomeByDateRange(BookingStatus.Confirmed, startDate, endDate))
                 .build();
+    }
+
+    @Override
+    public CommonResponseModel getLast12MonthsIncome(String phoneNumber) throws CommonException {
+        try {
+            Optional<AppUser> optionalAppUser = appUserRepository.findByPhoneNumber(phoneNumber);
+            if (optionalAppUser.isEmpty()) {
+                throw new CommonException("User with phone number " + phoneNumber + " does not exist");
+            }
+            LocalDate startDate = LocalDate.now().minusMonths(12);
+
+            YearMonth currentMonth = YearMonth.now();
+            List<YearMonth> last12Months = IntStream.range(0, 12)
+                    .mapToObj(currentMonth::minusMonths)
+                    .collect(Collectors.toList());
+
+            // Fetch income data from the repository
+            List<MonthlyIncome> incomeData = bookingRepository.findMonthlyIncome(currentMonth.minusMonths(12).atDay(1));
+
+            // Map fetched data into a map for easy lookup
+            Map<YearMonth, BigDecimal> incomeMap = incomeData.stream()
+                    .collect(Collectors.toMap(
+                            mi -> YearMonth.of(mi.getYear(), mi.getMonth()),
+                            MonthlyIncome::getTotalIncome
+                    ));
+
+            // Merge, fill missing months, and format month name
+            List<MonthlyIncomeDTO> allMonthsIncome =  last12Months.stream()
+                    .map(month -> {
+                        String monthName = month.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH) + " " + month.getYear();
+                        BigDecimal income = incomeMap.getOrDefault(month, BigDecimal.ZERO);
+                        return new MonthlyIncomeDTO(monthName, income);
+                    })
+                    .sorted((a, b) -> a.getMonthName().compareTo(b.getMonthName())) // Optional: already in order
+                    .collect(Collectors.toList());
+
+
+        return CommonResponseModel.builder()
+                    .status(HttpStatus.OK)
+                    .message("Booking Income By Monthly Retrieved Successfully")
+                    .data(allMonthsIncome)
+                    .build();
+        }catch (Exception e){
+            throw new CommonException(e.getMessage());
+        }
     }
 
 }

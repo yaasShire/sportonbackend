@@ -1,5 +1,6 @@
 package com.sporton.SportOn.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,5 +18,6 @@ public class Region {
     @NonNull
     private String name;
     @OneToMany(mappedBy = "region", cascade = CascadeType.ALL)
+    @JsonBackReference
     private List<Venue> venues;
 }

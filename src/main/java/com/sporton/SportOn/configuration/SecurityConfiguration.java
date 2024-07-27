@@ -54,7 +54,12 @@ public class SecurityConfiguration {
 
 
         .requestMatchers(HttpMethod.POST, "/api/v1/region/create").hasAnyAuthority(ADMIN_CREATE.getPermission())
-        .requestMatchers(HttpMethod.POST, "/api/v1/venue/create").hasAnyAuthority(PROVIDER_CREATE.getPermission(), ADMIN_CREATE.getPermission())
+        .requestMatchers(HttpMethod.PUT, "/api/v1/region/update/**").hasAnyAuthority(ADMIN_UPDATE.getPermission())
+        .requestMatchers(HttpMethod.DELETE, "/api/v1/region/delete/**").hasAnyAuthority(ADMIN_DELETE.getPermission())
+        .requestMatchers(HttpMethod.GET, "/api/v1/region/getAll").hasAnyAuthority(ADMIN_READ.getPermission(), PROVIDER_READ.getPermission())
+
+
+            .requestMatchers(HttpMethod.POST, "/api/v1/venue/create").hasAnyAuthority(PROVIDER_CREATE.getPermission(), ADMIN_CREATE.getPermission())
         .requestMatchers(HttpMethod.PUT, "/api/v1/venue/update/**").hasAnyAuthority(PROVIDER_UPDATE.getPermission(), ADMIN_UPDATE.getPermission())
         .requestMatchers(HttpMethod.GET, "/api/v1/venue/isVenueFavoritedByUser/**").hasAnyAuthority(PROVIDER_READ.getPermission(), ADMIN_READ.getPermission(), USER_READ.getPermission())
         .requestMatchers(HttpMethod.GET, "/api/v1/venue/getNumberOfVenues").hasAnyAuthority(PROVIDER_READ.getPermission(), ADMIN_READ.getPermission())
@@ -83,6 +88,8 @@ public class SecurityConfiguration {
         .requestMatchers(HttpMethod.GET, "/api/v1/booking/getNumberOfPendingOrders").hasAnyAuthority(PROVIDER_READ.getPermission(), ADMIN_READ.getPermission())
         .requestMatchers(HttpMethod.GET, "/api/v1/booking/getMatchesByDate").hasAnyAuthority(PROVIDER_READ.getPermission(), ADMIN_READ.getPermission())
         .requestMatchers(HttpMethod.GET, "/api/v1/booking/income").hasAnyAuthority(ADMIN_READ.getPermission())
+        .requestMatchers(HttpMethod.GET, "/api/v1/booking/getMatchesByDate").hasAnyAuthority(PROVIDER_READ.getPermission(), ADMIN_READ.getPermission())
+        .requestMatchers(HttpMethod.GET, "/api/v1/booking/getLast12MonthsIncome").hasAnyAuthority(ADMIN_READ.getPermission())
 
         .requestMatchers(HttpMethod.GET, "/api/v1/booking/getBookingByCustomerId").hasAnyAuthority(PROVIDER_READ.getPermission(), ADMIN_READ.getPermission(), USER_READ.getPermission())
         .requestMatchers(HttpMethod.POST, "/api/v1/facility/create").hasAnyAuthority(PROVIDER_CREATE.getPermission(), ADMIN_CREATE.getPermission())
@@ -104,6 +111,10 @@ public class SecurityConfiguration {
         .requestMatchers(HttpMethod.PUT, "/api/v1/authenticate/approveProvider/**").hasAnyAuthority(ADMIN_UPDATE.getPermission())
         .requestMatchers(HttpMethod.GET, "/api/v1/authenticate/getAllProviders").hasAnyAuthority(ADMIN_READ.getPermission())
         .requestMatchers(HttpMethod.PUT, "/api/v1/authenticate/editProviderBySuperAdmin/**").hasAnyAuthority(ADMIN_UPDATE.getPermission())
+        .requestMatchers(HttpMethod.GET, "/api/v1/authenticate/getTotalNumberOfCustomers").hasAnyAuthority(ADMIN_READ.getPermission())
+        .requestMatchers(HttpMethod.GET, "/api/v1/authenticate/getAllProvidersSubscriptions").hasAnyAuthority(ADMIN_READ.getPermission())
+        .requestMatchers(HttpMethod.GET, "/api/v1/authenticate/getAllCustomers").hasAnyAuthority(ADMIN_READ.getPermission())
+        .requestMatchers(HttpMethod.GET, "/api/v1/authenticate/getProviderById").hasAnyAuthority(ADMIN_READ.getPermission(), PROVIDER_READ.getPermission())
 
 
         .anyRequest()

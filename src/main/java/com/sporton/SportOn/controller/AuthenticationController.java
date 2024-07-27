@@ -134,6 +134,19 @@ public class AuthenticationController {
         }
     }
 
+    @GetMapping("/getTotalNumberOfCustomers")
+    public CommonResponseModel getTotalNumberOfCustomers(
+            @RequestHeader("Authorization") String authorizationHeader
+    ) throws AuthenticationException {
+        try {
+            String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+            String phoneNumber = jwtService.extractUsername(token);
+            return authenticateService.getTotalNumberOfCustomers(phoneNumber);
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
     @GetMapping("/getTotalNumberOfSubscribedProviders")
     public CommonResponseModel getTotalNumberOfSubscribedProviders(
             @RequestHeader("Authorization") String authorizationHeader
@@ -243,6 +256,19 @@ public class AuthenticationController {
         }
     }
 
+    @GetMapping("/getAllCustomers")
+    public CommonResponseModel getAllCustomers(
+            @RequestHeader("Authorization") String authorizationHeader
+    ) throws AuthenticationException {
+        try {
+            String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+            String phoneNumber = jwtService.extractUsername(token);
+            return authenticateService.getAllCustomers(phoneNumber);
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
     @PutMapping("/editProviderBySuperAdmin/{providerId}")
     public CommonResponseModel editProviderBySuperAdmin(
             @RequestHeader("Authorization") String authorizationHeader,
@@ -258,4 +284,30 @@ public class AuthenticationController {
         }
     }
 
+    @GetMapping("/getAllProvidersSubscriptions")
+    public CommonResponseModel getAllProvidersSubscriptions(
+            @RequestHeader("Authorization") String authorizationHeader
+    ) throws AuthenticationException {
+        try {
+            String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+            String phoneNumber = jwtService.extractUsername(token);
+            return authenticateService.getAllProvidersSubscriptions(phoneNumber);
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
+
+    @GetMapping("/getProviderById/{providerId}")
+    public CommonResponseModel getProviderById(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Long providerId
+    ) throws AuthenticationException {
+        try {
+            String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+            String phoneNumber = jwtService.extractUsername(token);
+            return authenticateService.getProviderById(phoneNumber, providerId);
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
+        }
+    }
 }

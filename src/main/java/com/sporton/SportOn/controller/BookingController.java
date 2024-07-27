@@ -226,4 +226,16 @@ public class BookingController {
             throw new CommonException(e.getMessage());
         }
     }
-}
+
+    @GetMapping("/getLast12MonthsIncome")
+    public CommonResponseModel getLast12MonthsIncome(
+            @RequestHeader("Authorization") String authorizationHeader
+    ) throws CommonException {
+        try {
+            String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+            String phoneNumber = jwtService.extractUsername(token);
+            return bookingService.getLast12MonthsIncome(phoneNumber);
+        }catch (Exception e){
+            throw new CommonException(e.getMessage());
+        }
+    }}

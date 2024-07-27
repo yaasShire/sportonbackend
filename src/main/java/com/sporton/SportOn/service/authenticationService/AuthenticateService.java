@@ -55,4 +55,12 @@ public interface AuthenticateService {
     CommonResponseModel getAllProviders(String phoneNumber) throws AuthenticationException;
 
     CommonResponseModel editProviderBySuperAdmin(String phoneNumber, SignUpRequestModel body, Long providerId) throws AuthenticationException;
+
+    CommonResponseModel getTotalNumberOfCustomers(String phoneNumber) throws AuthenticationException;
+
+    CommonResponseModel getAllProvidersSubscriptions(String phoneNumber) throws AuthenticationException;
+
+    CommonResponseModel getProviderById(String phoneNumber, Long providerId) throws AuthenticationException;
+
+    CommonResponseModel getAllCustomers(String phoneNumber) throws AuthenticationException;
 }

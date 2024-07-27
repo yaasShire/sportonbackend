@@ -44,11 +44,7 @@ public class RegionImpl implements RegionService{
     public List<Region> getAllRegions() throws RegionException {
         try {
             Optional<List<Region>> optionalRegions = Optional.of(regionRepository.findAll());
-            if (optionalRegions.isPresent()){
-                return optionalRegions.get();
-            }else {
-                throw new RegionException("No Regions Found");
-            }
+            return optionalRegions.get();
         }catch (Exception e){
             throw new RegionException(e.getMessage());
         }
@@ -61,11 +57,10 @@ public class RegionImpl implements RegionService{
             if (optionalRegion.isPresent()){
                 optionalRegion.get().setName(body.getName());
                 regionRepository.save(optionalRegion.get());
-                RegionResponse regionResponse = RegionResponse.builder()
+                return RegionResponse.builder()
                         .status(HttpStatus.OK)
-                        .message("Region with id '" + regionId + "' successfully updated")
+                        .message("Region with id '" + regionId + "' Successfully Updated")
                         .build();
-                return regionResponse;
             }else {
                 throw new RegionException("No region with id '" + regionId + "' is found");
             }
@@ -80,11 +75,10 @@ public class RegionImpl implements RegionService{
             Optional<Region> optionalRegion = regionRepository.findById(regionId);
             if (optionalRegion.isPresent()){
                 regionRepository.deleteById(regionId);
-                RegionResponse regionResponse = RegionResponse.builder()
+                return RegionResponse.builder()
                         .status(HttpStatus.OK)
-                        .message("Region with id '" + regionId + "' successfully deleted")
+                        .message("Region with id '" + regionId + "' Successfully Deleted")
                         .build();
-                return regionResponse;
             }else {
                 throw new RegionException("No region with id '" + regionId + "' is found");
             }

@@ -21,25 +21,25 @@ public interface BookingService {
 
     CommonResponseModel confirmtBooking(Long bookingId) throws CommonException;
 
-    List<ProviderOrderResponseDTO> getBookingsByProviderId(String phoneNumber) throws CommonException;
+    List<ProviderOrderResponseDTO> getBookingsByProviderId(String phoneNumber , Integer page, Integer size) throws CommonException;
 
     List<Booking> getBookingByCustomerId(String phoneNumber) throws CommonException;
 
-    CommonResponseModel getNumberOfNewOrders(String phoneNumber) throws CommonException;
+    CommonResponseModel getNumberOfNewOrders(String phoneNumber, Integer page, Integer size) throws CommonException;
 
-    CommonResponseModel getPendingOrders(String phoneNumber) throws CommonException;
+    CommonResponseModel getPendingOrders(String phoneNumber, Integer page, Integer size) throws CommonException;
 
-    CommonResponseModel getConfirmedOrders(String phoneNumber) throws CommonException;
+    CommonResponseModel getConfirmedOrders(String phoneNumber , Integer page, Integer size) throws CommonException;
 
-    CommonResponseModel getCancelledOrders(String phoneNumber) throws CommonException;
+    CommonResponseModel getCancelledOrders(String phoneNumber , Integer page, Integer size) throws CommonException;
 
-    CommonResponseModel getNumberOfTodayOrders(String phoneNumber);
+    CommonResponseModel getNumberOfTodayOrders(String phoneNumber , Integer page, Integer size);
 
-    CommonResponseModel getNumberOfTodayMatches(String phoneNumber);
+    CommonResponseModel getNumberOfTodayMatches(String phoneNumber , Integer page, Integer size);
 
-    CommonResponseModel getNumberOfPendingOrders(String phoneNumber);
+    CommonResponseModel getNumberOfPendingOrders(String phoneNumber , Integer page, Integer size);
 
-    CommonResponseModel getMatchesByDate(String phoneNumber, MatchesRequestModel body) throws CommonException;
+    CommonResponseModel getMatchesByDate(String phoneNumber, MatchesRequestModel body , Integer page, Integer size) throws CommonException;
 
     CommonResponseModel getTotalIncomeByPeriod(String periodType);
 

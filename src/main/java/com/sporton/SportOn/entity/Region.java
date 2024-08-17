@@ -16,6 +16,7 @@ public class Region {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long regionId;
     @NonNull
+    @Column(unique = true)
     private String name;
     @OneToMany(mappedBy = "region", cascade = CascadeType.ALL)
     @JsonBackReference

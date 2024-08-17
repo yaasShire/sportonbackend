@@ -8,6 +8,7 @@ import com.sporton.SportOn.exception.authenticationException.AuthenticationExcep
 import com.sporton.SportOn.model.CommonResponseModel;
 import com.sporton.SportOn.model.authenticationModel.*;
 import com.sporton.SportOn.service.authenticationService.AuthenticateService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,6 +21,7 @@ public class AuthenticationController {
     private final JWTService jwtService;
 
     @PostMapping("/signUp")
+    @Operation(summary = "Sign Up", description = "This endpoint register user.")
     public OTPResponseModel signUpUser(@RequestBody SignUpRequestModel body) throws AuthenticationException {
         return authenticateService.signUpUser(body);
     }

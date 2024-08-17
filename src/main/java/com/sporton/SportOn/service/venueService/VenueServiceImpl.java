@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -90,6 +92,7 @@ public class VenueServiceImpl implements VenueService{
     @Override
     public List<Venue> getAllVenues(int page, int size) throws VenueException {
         try {
+            //Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
             PageRequest pageRequest = PageRequest.of(page, size);
             Optional<Page<Venue>> optionalVenues = Optional.of(venueRepository.findAll(pageRequest));
             return optionalVenues.get().getContent();
@@ -195,8 +198,6 @@ public class VenueServiceImpl implements VenueService{
             throw new VenueException(e.getMessage());
         }
     }
-
-
 
     @Override
     public List<Venue> getSingleProviderVenues(String phoneNumber, int page, int size) throws VenueException {

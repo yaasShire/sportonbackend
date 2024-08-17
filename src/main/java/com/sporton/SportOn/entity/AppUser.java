@@ -39,7 +39,7 @@ public class AppUser implements UserDetails {
     private Boolean approved=false;
 
 @JsonBackReference
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private List<Subscription> subscriptions;
 //    @ManyToMany
 //    @JoinTable(

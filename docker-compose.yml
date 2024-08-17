@@ -8,7 +8,7 @@ services:
       POSTGRES_DB: sportOnDB
       POSTGRES_DATA: /data/postgres
     ports:
-      - 5432:5432
+      - 5434:5432
     volumes:
       - sporton_db:/var/lib/postgresql/data
     restart: unless-stopped

@@ -492,6 +492,10 @@ public class AuthenticationServiceImpl implements AuthenticateService {
                 throw new AuthenticationException("User is not a provider");
             }
 
+            if (user.getPhoneNumber() != phoneNumber) {
+                throw new AuthenticationException("User is not a provider");
+            }
+
             Optional<Subscription> existingSubscription = subscriptionRepository.findActiveSubscriptionByUserId(user.getId());
             if (existingSubscription.isPresent()) {
                 throw new AuthenticationException("User already has an active subscription");
@@ -869,17 +873,20 @@ public class AuthenticationServiceImpl implements AuthenticateService {
     }
 
     @Scheduled(cron = "0 0 0 * * ?")
-    public void checkSubscriptions() {
-        List<AppUser> users = appUserRepository.findByRole(Role.PROVIDER);
-        for (AppUser user : users) {
-            boolean anyActiveSubscription = user.getSubscriptions().stream()
-                    .anyMatch(Subscription::isActive);
+    public void checkSubscriptions() throws AuthenticationException {
+        try {
+            List<AppUser> users = appUserRepository.findByRole(Role.PROVIDER);
+            for (AppUser user : users) {
+                boolean anyActiveSubscription = user.getSubscriptions().stream()
+                        .anyMatch(Subscription::isActive);
 
-            if (!anyActiveSubscription && user.getApproved()) {
-                user.setApproved(false);
-                appUserRepository.save(user);
+                if (!anyActiveSubscription && user.getApproved()) {
+                    user.setApproved(false);
+                    appUserRepository.save(user);
+                }
             }
+        }catch (Exception e){
+            throw new AuthenticationException(e.getMessage());
         }
     }
-
 }

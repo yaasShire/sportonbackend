@@ -9,6 +9,8 @@ import com.sporton.SportOn.model.bookingModel.*;
 import com.sporton.SportOn.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -214,14 +216,14 @@ public class BookingServiceImpl implements BookingService{
     }
 
     @Override
-    public List<ProviderOrderResponseDTO> getBookingsByProviderId(String phoneNumber) throws CommonException {
+    public List<ProviderOrderResponseDTO> getBookingsByProviderId(String phoneNumber , Integer page, Integer size) throws CommonException {
         try {
             Optional<AppUser> optionalAppUser = appUserRepository.findByPhoneNumber(phoneNumber);
             if (optionalAppUser.isEmpty()) {
                 throw new CommonException("User with phone number " + phoneNumber + " does not exist");
             }
-
-            Optional<List<Booking>> optionalBookings = bookingRepository.findByProviderId(optionalAppUser.get().getId());
+            Pageable pageable = PageRequest.of(page, size, Sort.by("bookingDate").descending());
+            Optional<List<Booking>> optionalBookings = bookingRepository.findByProviderId(pageable, optionalAppUser.get().getId());
             if (optionalBookings.isEmpty() || optionalBookings.get().isEmpty()) {
                 throw new CommonException("No bookings found for provider");
             }
@@ -297,14 +299,15 @@ public class BookingServiceImpl implements BookingService{
         }
     }
 
-    public CommonResponseModel getNumberOfNewOrders(String phoneNumber) throws CommonException {
+    public CommonResponseModel getNumberOfNewOrders(String phoneNumber, Integer page, Integer size) throws CommonException {
         try {
             Optional<AppUser> optionalAppUser = appUserRepository.findByPhoneNumber(phoneNumber);
             if (optionalAppUser.isEmpty()) {
                 throw new CommonException("User with phone number " + phoneNumber + " does not exist");
             }
+            Pageable pageable = PageRequest.of(page, size, Sort.by("bookingDate").descending());
 
-            Optional<List<Booking>> optionalBookings = bookingRepository.findByProviderId(optionalAppUser.get().getId());
+            Optional<List<Booking>> optionalBookings = bookingRepository.findByProviderId(pageable, optionalAppUser.get().getId());
             if (optionalBookings.isEmpty() || optionalBookings.get().isEmpty()) {
                 throw new CommonException("No bookings found for provider");
             }
@@ -386,13 +389,15 @@ public class BookingServiceImpl implements BookingService{
     }
 
     @Override
-    public CommonResponseModel getPendingOrders(String phoneNumber) throws CommonException {
+    public CommonResponseModel getPendingOrders(String phoneNumber, Integer page, Integer size) throws CommonException {
         try {
             Optional<AppUser> optionalAppUser = appUserRepository.findByPhoneNumber(phoneNumber);
             if (optionalAppUser.isEmpty()) {
                 throw new CommonException("User with phone number " + phoneNumber + " does not exist");
             }
-            Optional<List<Booking>> allBookings = bookingRepository.findByProviderId(optionalAppUser.get().getId());
+            Pageable pageable = PageRequest.of(page, size, Sort.by("bookingDate").descending());
+
+            Optional<List<Booking>> allBookings = bookingRepository.findByProviderId(pageable, optionalAppUser.get().getId());
             List<Booking> pendingBookings = new ArrayList<>();
 
             for (Booking booking : allBookings.get()) {
@@ -469,13 +474,14 @@ public class BookingServiceImpl implements BookingService{
     }
 
     @Override
-    public CommonResponseModel getConfirmedOrders(String phoneNumber) throws CommonException {
+    public CommonResponseModel getConfirmedOrders(String phoneNumber, Integer page, Integer size) throws CommonException {
         try {
             Optional<AppUser> optionalAppUser = appUserRepository.findByPhoneNumber(phoneNumber);
             if (optionalAppUser.isEmpty()) {
                 throw new CommonException("User with phone number " + phoneNumber + " does not exist");
             }
-            Optional<List<Booking>> allBookings = bookingRepository.findByProviderId(optionalAppUser.get().getId());
+            Pageable pageable = PageRequest.of(page, size, Sort.by("bookingDate").descending());
+            Optional<List<Booking>> allBookings = bookingRepository.findByProviderId(pageable, optionalAppUser.get().getId());
             List<Booking> confirmedBookings = new ArrayList<>();
 
             for (Booking booking : allBookings.get()) {
@@ -552,13 +558,14 @@ public class BookingServiceImpl implements BookingService{
     }
 
     @Override
-    public CommonResponseModel getCancelledOrders(String phoneNumber) throws CommonException {
+    public CommonResponseModel getCancelledOrders(String phoneNumber , Integer page, Integer size) throws CommonException {
         try {
             Optional<AppUser> optionalAppUser = appUserRepository.findByPhoneNumber(phoneNumber);
             if (optionalAppUser.isEmpty()) {
                 throw new CommonException("User with phone number " + phoneNumber + " does not exist");
             }
-            Optional<List<Booking>> allBookings = bookingRepository.findByProviderId(optionalAppUser.get().getId());
+            Pageable pageable = PageRequest.of(page, size, Sort.by("bookingDate").descending());
+            Optional<List<Booking>> allBookings = bookingRepository.findByProviderId(pageable, optionalAppUser.get().getId());
             List<Booking> confirmedBookings = new ArrayList<>();
 
             for (Booking booking : allBookings.get()) {
@@ -636,13 +643,14 @@ public class BookingServiceImpl implements BookingService{
     }
 
     @Override
-    public CommonResponseModel getNumberOfTodayOrders(String phoneNumber) {
+    public CommonResponseModel getNumberOfTodayOrders(String phoneNumber , Integer page, Integer size) {
         try {
             Optional<AppUser> optionalAppUser = appUserRepository.findByPhoneNumber(phoneNumber);
             if (optionalAppUser.isEmpty()) {
                 throw new CommonException("User with phone number " + phoneNumber + " does not exist");
             }
-            Optional<List<Booking>> optionalBookings = bookingRepository.findByProviderId(optionalAppUser.get().getId());
+            Pageable pageable = PageRequest.of(page, size, Sort.by("bookingDate").descending());
+            Optional<List<Booking>> optionalBookings = bookingRepository.findByProviderId(pageable, optionalAppUser.get().getId());
             if (optionalBookings.isEmpty() || optionalBookings.get().isEmpty()) {
                 throw new CommonException("No bookings found for provider");
             }
@@ -669,14 +677,14 @@ public class BookingServiceImpl implements BookingService{
     }
 
     @Override
-    public CommonResponseModel getNumberOfTodayMatches(String phoneNumber) {
+    public CommonResponseModel getNumberOfTodayMatches(String phoneNumber , Integer page, Integer size) {
         try {
             Optional<AppUser> optionalAppUser = appUserRepository.findByPhoneNumber(phoneNumber);
             if (optionalAppUser.isEmpty()) {
                 throw new CommonException("User with phone number " + phoneNumber + " does not exist");
             }
-
-            Optional<List<Booking>> optionalBookings = bookingRepository.findByProviderId(optionalAppUser.get().getId());
+            Pageable pageable = PageRequest.of(page, size, Sort.by("bookingDate").descending());
+            Optional<List<Booking>> optionalBookings = bookingRepository.findByProviderId(pageable, optionalAppUser.get().getId());
             if (optionalBookings.isEmpty() || optionalBookings.get().isEmpty()) {
                 throw new CommonException("No bookings found for provider");
             }
@@ -703,14 +711,14 @@ public class BookingServiceImpl implements BookingService{
     }
 
     @Override
-    public CommonResponseModel getNumberOfPendingOrders(String phoneNumber) {
+    public CommonResponseModel getNumberOfPendingOrders(String phoneNumber, Integer page, Integer size) {
         try {
             Optional<AppUser> optionalAppUser = appUserRepository.findByPhoneNumber(phoneNumber);
             if (optionalAppUser.isEmpty()) {
                 throw new CommonException("User with phone number " + phoneNumber + " does not exist");
             }
-
-            Optional<List<Booking>> optionalBookings = bookingRepository.findByProviderId(optionalAppUser.get().getId());
+            Pageable pageable = PageRequest.of(page, size, Sort.by("bookingDate").descending());
+            Optional<List<Booking>> optionalBookings = bookingRepository.findByProviderId(pageable, optionalAppUser.get().getId());
             if (optionalBookings.isEmpty() || optionalBookings.get().isEmpty()) {
                 throw new CommonException("No bookings found for provider");
             }
@@ -737,7 +745,7 @@ public class BookingServiceImpl implements BookingService{
     }
 
     @Override
-    public CommonResponseModel getMatchesByDate(String phoneNumber, MatchesRequestModel body) throws CommonException {
+    public CommonResponseModel getMatchesByDate(String phoneNumber, MatchesRequestModel body , Integer page, Integer size) throws CommonException {
         try {
             Optional<AppUser> optionalAppUser = appUserRepository.findByPhoneNumber(phoneNumber);
             if (optionalAppUser.isEmpty()) {
@@ -746,8 +754,8 @@ public class BookingServiceImpl implements BookingService{
 
             AppUser appUser = optionalAppUser.get();
             LocalDate targetDate = convertToLocalDate(body.getDate());
-
-            List<Booking> confirmedBookings = bookingRepository.findByProviderId(appUser.getId())
+            Pageable pageable = PageRequest.of(page, size, Sort.by("bookingDate").descending());
+            List<Booking> confirmedBookings = bookingRepository.findByProviderId(pageable, appUser.getId())
                     .orElseThrow(() -> new CommonException("No bookings found for user"))
                     .stream()
                     .filter(booking -> booking.getStatus() == BookingStatus.Confirmed)

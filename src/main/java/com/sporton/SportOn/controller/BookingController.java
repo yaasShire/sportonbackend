@@ -49,12 +49,14 @@ public class BookingController {
 
     @GetMapping("/getBookingByProviderId")
     public List<ProviderOrderResponseDTO> getBookingsByProviderId(
-            @RequestHeader("Authorization") String authorizationHeader
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size
     ) throws CommonException {
         try {
             String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
             String phoneNumber = jwtService.extractUsername(token);
-            return bookingService.getBookingsByProviderId(phoneNumber);
+            return bookingService.getBookingsByProviderId(phoneNumber , page, size);
         }catch (Exception e){
             throw new CommonException(e.getMessage());
         }
@@ -115,12 +117,14 @@ public class BookingController {
 
     @GetMapping("/getTop10NewOrders")
     public CommonResponseModel getNumberOfNewOrders(
-            @RequestHeader("Authorization") String authorizationHeader
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size
     ) throws CommonException {
         try {
             String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
             String phoneNumber = jwtService.extractUsername(token);
-            return bookingService.getNumberOfNewOrders(phoneNumber);
+            return bookingService.getNumberOfNewOrders(phoneNumber , page, size);
         }catch (Exception e){
             throw new CommonException(e.getMessage());
         }
@@ -128,12 +132,14 @@ public class BookingController {
 
     @GetMapping("/getPendingOrders")
     public CommonResponseModel getPendingOrders(
-            @RequestHeader("Authorization") String authorizationHeader
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size
     ) throws CommonException {
         try {
             String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
             String phoneNumber = jwtService.extractUsername(token);
-            return bookingService.getPendingOrders(phoneNumber);
+            return bookingService.getPendingOrders(phoneNumber, page, size);
         }catch (Exception e){
             throw new CommonException(e.getMessage());
         }
@@ -141,12 +147,14 @@ public class BookingController {
 
     @GetMapping("/getConfirmedOrders")
     public CommonResponseModel getConfirmedOrders(
-            @RequestHeader("Authorization") String authorizationHeader
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size
     ) throws CommonException {
         try {
             String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
             String phoneNumber = jwtService.extractUsername(token);
-            return bookingService.getConfirmedOrders(phoneNumber);
+            return bookingService.getConfirmedOrders(phoneNumber, page, size);
         }catch (Exception e){
             throw new CommonException(e.getMessage());
         }
@@ -154,12 +162,14 @@ public class BookingController {
 
     @GetMapping("/getCancelledOrders")
     public CommonResponseModel getCancelledOrders(
-            @RequestHeader("Authorization") String authorizationHeader
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size
     ) throws CommonException {
         try {
             String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
             String phoneNumber = jwtService.extractUsername(token);
-            return bookingService.getCancelledOrders(phoneNumber);
+            return bookingService.getCancelledOrders(phoneNumber, page, size);
         }catch (Exception e){
             throw new CommonException(e.getMessage());
         }
@@ -167,12 +177,14 @@ public class BookingController {
 
     @GetMapping("/getNumberOfTodayOrders")
     public CommonResponseModel getNumberOfTodayOrders(
-            @RequestHeader("Authorization") String authorizationHeader
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size
     ) throws CommonException {
         try {
             String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
             String phoneNumber = jwtService.extractUsername(token);
-            return bookingService.getNumberOfTodayOrders(phoneNumber);
+            return bookingService.getNumberOfTodayOrders(phoneNumber , page, size);
         }catch (Exception e){
             throw new CommonException(e.getMessage());
         }
@@ -180,12 +192,14 @@ public class BookingController {
 
     @GetMapping("/getNumberOfTodayMatches")
     public CommonResponseModel getNumberOfTodayMatches(
-            @RequestHeader("Authorization") String authorizationHeader
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size
     ) throws CommonException {
         try {
             String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
             String phoneNumber = jwtService.extractUsername(token);
-            return bookingService.getNumberOfTodayMatches(phoneNumber);
+            return bookingService.getNumberOfTodayMatches(phoneNumber , page, size);
         }catch (Exception e){
             throw new CommonException(e.getMessage());
         }
@@ -193,12 +207,14 @@ public class BookingController {
 
     @GetMapping("/getNumberOfPendingOrders")
     public CommonResponseModel getNumberOfPendingOrders(
-            @RequestHeader("Authorization") String authorizationHeader
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size
     ) throws CommonException {
         try {
             String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
             String phoneNumber = jwtService.extractUsername(token);
-            return bookingService.getNumberOfPendingOrders(phoneNumber);
+            return bookingService.getNumberOfPendingOrders(phoneNumber, page, size);
         }catch (Exception e){
             throw new CommonException(e.getMessage());
         }
@@ -207,12 +223,14 @@ public class BookingController {
     @PostMapping("/getMatchesByDate")
     public CommonResponseModel getMatchesByDate(
             @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size,
             @RequestBody MatchesRequestModel body
             ) throws CommonException {
         try {
             String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
             String phoneNumber = jwtService.extractUsername(token);
-            return bookingService.getMatchesByDate(phoneNumber, body);
+            return bookingService.getMatchesByDate(phoneNumber, body , page, size);
         }catch (Exception e){
             throw new CommonException(e.getMessage());
         }

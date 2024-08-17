@@ -47,8 +47,10 @@ public class SecurityConfiguration {
                 "/api/v1/court/getCourtsByVenueId/**",
                 "/api/v1/venue/search",
                 "/api/v1/venue/saveSearchedVenue",
-                "/api/v1/venue/getSavedSearchVenues"
-
+                "/api/v1/venue/getSavedSearchVenues",
+                "/v3/api-docs/**",
+                "/swagger-ui/**",
+                "/swagger-ui.html"
         )
           .permitAll()
 
@@ -59,7 +61,7 @@ public class SecurityConfiguration {
         .requestMatchers(HttpMethod.GET, "/api/v1/region/getAll").hasAnyAuthority(ADMIN_READ.getPermission(), PROVIDER_READ.getPermission())
 
 
-            .requestMatchers(HttpMethod.POST, "/api/v1/venue/create").hasAnyAuthority(PROVIDER_CREATE.getPermission(), ADMIN_CREATE.getPermission())
+        .requestMatchers(HttpMethod.POST, "/api/v1/venue/create").hasAnyAuthority(PROVIDER_CREATE.getPermission(), ADMIN_CREATE.getPermission())
         .requestMatchers(HttpMethod.PUT, "/api/v1/venue/update/**").hasAnyAuthority(PROVIDER_UPDATE.getPermission(), ADMIN_UPDATE.getPermission())
         .requestMatchers(HttpMethod.GET, "/api/v1/venue/isVenueFavoritedByUser/**").hasAnyAuthority(PROVIDER_READ.getPermission(), ADMIN_READ.getPermission(), USER_READ.getPermission())
         .requestMatchers(HttpMethod.GET, "/api/v1/venue/getNumberOfVenues").hasAnyAuthority(PROVIDER_READ.getPermission(), ADMIN_READ.getPermission())

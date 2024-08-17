@@ -87,14 +87,14 @@ public class BookingServiceImpl implements BookingService{
 
 
     @Override
-    public List<BookedVenueResponseDTO> getBookingsByUserId(String phoneNumber) throws CommonException {
+    public List<BookedVenueResponseDTO> getBookingsByUserId(String phoneNumber, Integer page, Integer size) throws CommonException {
         try {
             Optional<AppUser> optionalAppUser = appUserRepository.findByPhoneNumber(phoneNumber);
             if (optionalAppUser.isEmpty()) {
                 throw new CommonException("User with phone number " + phoneNumber + " does not exist");
             }
-
-            Optional<List<Booking>> optionalBookings = bookingRepository.findByUserId(optionalAppUser.get().getId());
+            Pageable pageable = PageRequest.of(page, size, Sort.by("bookingDate").descending());
+            Optional<List<Booking>> optionalBookings = bookingRepository.findByUserId(pageable, optionalAppUser.get().getId());
             if (optionalBookings.isEmpty() || optionalBookings.get().isEmpty()) {
                 throw new CommonException("No bookings found for user");
             }
@@ -281,11 +281,12 @@ public class BookingServiceImpl implements BookingService{
     }
 
     @Override
-    public List<Booking> getBookingByCustomerId(String phoneNumber) throws CommonException {
+    public List<Booking> getBookingByCustomerId(String phoneNumber, Integer page, Integer size) throws CommonException {
         try {
             Optional<AppUser> appUser = appUserRepository.findByPhoneNumber(phoneNumber);
             if (appUser.isPresent()){
-                Optional<List<Booking>> optionalBookings = bookingRepository.findByUserId(appUser.get().getId());
+                Pageable pageable = PageRequest.of(page, size, Sort.by("bookingDate").descending());
+                Optional<List<Booking>> optionalBookings = bookingRepository.findByUserId(pageable, appUser.get().getId());
                 if (optionalBookings.isPresent()){
                     return optionalBookings.get();
                 }else {

@@ -491,10 +491,10 @@ public class AuthenticationServiceImpl implements AuthenticateService {
             if (user.getRole() != Role.PROVIDER) {
                 throw new AuthenticationException("User is not a provider");
             }
-
-            if (user.getPhoneNumber() != phoneNumber) {
-                throw new AuthenticationException("User is not a provider");
-            }
+//
+//            if (user.getPhoneNumber() != phoneNumber) {
+//                throw new AuthenticationException("User is not a provider");
+//            }
 
             Optional<Subscription> existingSubscription = subscriptionRepository.findActiveSubscriptionByUserId(user.getId());
             if (existingSubscription.isPresent()) {

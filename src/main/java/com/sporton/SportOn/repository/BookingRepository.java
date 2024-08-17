@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    Optional<List<Booking>> findByUserId(Long userId);
+    Optional<List<Booking>> findByUserId(Pageable pageable, Long userId);
 
     Optional<List<Booking>> findByProviderId(Pageable pageable, Long id);
 

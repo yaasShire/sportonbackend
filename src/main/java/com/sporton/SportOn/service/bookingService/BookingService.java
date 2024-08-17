@@ -13,7 +13,7 @@ import java.util.List;
 public interface BookingService {
     CommonResponseModel bookCourt(BookingRequest body, String phoneNumber) throws CommonException;
 
-    List<BookedVenueResponseDTO> getBookingsByUserId(String phoneNumber) throws CommonException;
+    List<BookedVenueResponseDTO> getBookingsByUserId(String phoneNumber , Integer page, Integer size) throws CommonException;
 
     CommonResponseModel updateBooking(Long bookingId, BookingRequest body) throws CommonException;
 
@@ -23,7 +23,7 @@ public interface BookingService {
 
     List<ProviderOrderResponseDTO> getBookingsByProviderId(String phoneNumber , Integer page, Integer size) throws CommonException;
 
-    List<Booking> getBookingByCustomerId(String phoneNumber) throws CommonException;
+    List<Booking> getBookingByCustomerId(String phoneNumber, Integer page, Integer size) throws CommonException;
 
     CommonResponseModel getNumberOfNewOrders(String phoneNumber, Integer page, Integer size) throws CommonException;
 

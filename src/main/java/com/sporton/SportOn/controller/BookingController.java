@@ -36,12 +36,14 @@ public class BookingController {
 
     @GetMapping("/get")
     public List<BookedVenueResponseDTO> getBookingsByUserId(
-            @RequestHeader("Authorization") String authorizationHeader
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size
     ) throws CommonException {
         try {
             String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
             String phoneNumber = jwtService.extractUsername(token);
-            return bookingService.getBookingsByUserId(phoneNumber);
+            return bookingService.getBookingsByUserId(phoneNumber, page, size);
         }catch (Exception e){
             throw new CommonException(e.getMessage());
         }
@@ -77,12 +79,14 @@ public class BookingController {
 
     @GetMapping("/getBookingByCustomerId")
     public List<BookedVenueResponseDTO> getBookingByCustomerId(
-            @RequestHeader("Authorization") String authorizationHeader
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size
     ) throws CommonException {
         try {
             String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
             String phoneNumber = jwtService.extractUsername(token);
-            return bookingService.getBookingsByUserId(phoneNumber);
+            return bookingService.getBookingsByUserId(phoneNumber, page, size);
         }catch (Exception e){
             throw new CommonException(e.getMessage());
         }

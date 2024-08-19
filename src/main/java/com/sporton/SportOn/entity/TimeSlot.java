@@ -21,9 +21,9 @@ public class TimeSlot {
     @NonNull
     private Long courtId;
     @NonNull
-    private LocalTime startTime;
+    private String startTime;
     @NonNull
-    private LocalTime endTime;
+    private String endTime;
     @NonNull
     private Boolean available;
     @NonNull

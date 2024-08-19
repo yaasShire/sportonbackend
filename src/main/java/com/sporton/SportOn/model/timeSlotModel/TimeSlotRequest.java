@@ -14,8 +14,8 @@ import java.util.Date;
 @NoArgsConstructor
 public class TimeSlotRequest {
     private Long courtId;
-    private LocalTime startTime;
-    private LocalTime endTime;
+    private String startTime;
+    private String endTime;
     private Boolean available;
     private Double price;
 }

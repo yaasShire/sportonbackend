@@ -20,7 +20,7 @@ public class BookedVenueResponseDTO {
     private Double totalPrice;
     private BookingStatus status;
     private String venuePhoneNumber;
-    private LocalTime startTime;
-    private LocalTime endTime;
+    private String startTime;
+    private String endTime;
     private String image;
 }

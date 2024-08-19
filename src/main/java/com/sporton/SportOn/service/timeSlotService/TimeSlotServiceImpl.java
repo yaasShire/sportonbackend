@@ -30,7 +30,7 @@ public class TimeSlotServiceImpl implements TimeSlotService{
         try {
             Optional<Court> optionalCourt = courtRepository.findById(body.getCourtId());
             if (optionalCourt.isPresent()){
-                Optional<List<TimeSlot>> optionalTimeSlot = timeSlotRepository.findByStartTimeOrEndTimeOrStartTimeBetweenAndEndTimeBetweenAndCourtId(body.getStartTime(), body.getEndTime(), body.getStartTime(), body.getEndTime(), body.getCourtId());
+                Optional<List<TimeSlot>> optionalTimeSlot = timeSlotRepository.findByMatchingOrOverlappingTimeSlotsForCourt(body.getStartTime(), body.getEndTime(), body.getCourtId());
                log.info("value --> {}", optionalTimeSlot.get());
                 if (optionalTimeSlot.get().isEmpty()){
                     log.info("There is no time slot matching this time slot");
@@ -87,18 +87,20 @@ log.info("time slot body {}", body);
         try {
             Optional<TimeSlot> optionalTimeSlot = timeSlotRepository.findById(timeSlotId);
             if (optionalTimeSlot.isPresent()){
-                Optional<List<TimeSlot>> checkTimeSlotExist = timeSlotRepository.findByStartTimeOrEndTimeOrStartTimeBetweenAndEndTimeBetweenAndCourtId(body.getStartTime(), body.getEndTime(), body.getStartTime(), body.getEndTime(), body.getCourtId());
-                if (checkTimeSlotExist.get().isEmpty()){
-                    optionalTimeSlot.get().setStartTime(body.getStartTime());
-                    optionalTimeSlot.get().setEndTime(body.getEndTime());
-                    optionalTimeSlot.get().setAvailable(body.getAvailable());
-                    optionalTimeSlot.get().setPrice(body.getPrice());
-                    timeSlotRepository.save(optionalTimeSlot.get());
+                Optional<List<TimeSlot>> checkTimeSlotExist = timeSlotRepository.findByMatchingOrOverlappingTimeSlotsForCourt(body.getStartTime(), body.getEndTime(), body.getCourtId());
+                if (checkTimeSlotExist.isPresent() && checkTimeSlotExist.get().isEmpty()) {
+                    TimeSlot timeSlotToUpdate = optionalTimeSlot.get();
+                    timeSlotToUpdate.setStartTime(body.getStartTime());
+                    timeSlotToUpdate.setEndTime(body.getEndTime());
+                    timeSlotToUpdate.setAvailable(body.getAvailable());
+                    timeSlotToUpdate.setPrice(body.getPrice());
+                    timeSlotRepository.save(timeSlotToUpdate);
+
                     return CommonResponseModel.builder()
                             .status(HttpStatus.OK)
                             .message("Time Slot Updated Successfully")
                             .build();
-                }else {
+                } else {
                     throw new CommonException("Invalid Time Slot, Time Slot Already Exists");
                 }
             }else {

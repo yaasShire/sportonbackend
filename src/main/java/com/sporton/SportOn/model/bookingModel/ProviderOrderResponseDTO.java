@@ -24,7 +24,7 @@ public class ProviderOrderResponseDTO {
     private Double totalPrice;
     private BookingStatus status;
     private String userPhoneNumber;
-    private LocalTime startTime;
-    private LocalTime endTime;
+    private String startTime;
+    private String endTime;
     private String userProfileImage;
 }

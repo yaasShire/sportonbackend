@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Table(name = "rating")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

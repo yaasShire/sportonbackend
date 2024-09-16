@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
@@ -196,15 +197,36 @@ public class BookingServiceImpl implements BookingService{
             Optional<Booking> optionalBooking = bookingRepository.findById(bookingId);
             if (optionalBooking.isPresent()){
 //                cancel logic happens here
-                if (optionalBooking.get().getStatus()==BookingStatus.Pending){
+                if (optionalBooking.get().getStatus() == BookingStatus.Pending) {
+                    // Get current date and time
+                    LocalDate currentDate = LocalDate.now();
+                    LocalTime currentTime = LocalTime.now();
+
+                    // Retrieve the matchDate and timeSlot from the booking
+                    LocalDate matchDate = optionalBooking.get().getMatchDate();
+                    TimeSlot timeSlot = timeSlotRepository.findById(optionalBooking.get().getTimeSlotId())
+                            .orElseThrow(() -> new CommonException("Time slot not found"));
+
+                    // Parse the timeSlot's startTime and endTime from String to LocalTime
+                    LocalTime slotStartTime = LocalTime.parse(timeSlot.getStartTime());
+                    LocalTime slotEndTime = LocalTime.parse(timeSlot.getEndTime());
+
+                    // Check if matchDate is before the current date
+                    if (matchDate.isBefore(currentDate) ||
+                            (matchDate.isEqual(currentDate) && slotEndTime.isBefore(currentTime))) {
+                        throw new CommonException("The booking has expired and cannot be confirmed");
+                    }
+
+                    // Update the booking status to Confirmed
                     optionalBooking.get().setStatus(BookingStatus.Confirmed);
                     bookingRepository.save(optionalBooking.get());
+
                     return CommonResponseModel.builder()
                             .status(HttpStatus.OK)
                             .message("Booking Confirmed Successfully")
                             .build();
-                }else {
-                    throw new CommonException("The order is not a Pending order" + bookingId);
+                } else {
+                    throw new CommonException("The order is not a Pending order: " + bookingId);
                 }
 
             }else {

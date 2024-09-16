@@ -26,4 +26,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "GROUP BY YEAR(b.matchDate), MONTH(b.matchDate) " +
             "ORDER BY YEAR(b.matchDate), MONTH(b.matchDate)")
     List<MonthlyIncome> findMonthlyIncome(@Param("startDate") LocalDate startDate);
-}
+
+    List<Booking> findByStatus(BookingStatus status);
+
+    }

@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 
@@ -214,6 +215,8 @@ public class BookingServiceImpl implements BookingService{
                     // Check if matchDate is before the current date
                     if (matchDate.isBefore(currentDate) ||
                             (matchDate.isEqual(currentDate) && slotEndTime.isBefore(currentTime))) {
+                        optionalBooking.get().setStatus(BookingStatus.Expired);
+                        bookingRepository.save(optionalBooking.get());
                         throw new CommonException("The booking has expired and cannot be confirmed");
                     }
 
@@ -931,4 +934,39 @@ public class BookingServiceImpl implements BookingService{
         }
     }
 
+
+
+    @Scheduled(fixedRate = 3600000) // Every hour (in milliseconds)
+    public void updateExpiredBookings() throws CommonException {
+        try {
+            LocalDate currentDate = LocalDate.now();
+            LocalTime currentTime = LocalTime.now();
+
+            // Find all confirmed bookings
+            List<Booking> confirmedBookings = bookingRepository.findByStatus(BookingStatus.Confirmed);
+
+            for (Booking booking : confirmedBookings) {
+                // Check if matchDate and endTime of the timeSlot have passed
+                if (booking.getMatchDate().isBefore(currentDate) ||
+                        (booking.getMatchDate().isEqual(currentDate) && hasMatchEnded(booking.getTimeSlotId(), currentTime))) {
+                    booking.setStatus(BookingStatus.Completed);
+                    bookingRepository.save(booking);  // Update the status to Completed
+                }
+            }
+        }catch (Exception e){
+            throw new CommonException(e.getMessage());
+        }
+    }
+
+    // Helper method to check if the time slot's end time has passed
+    private boolean hasMatchEnded(Long timeSlotId, LocalTime currentTime) throws CommonException {
+        try {
+            TimeSlot timeSlot = timeSlotRepository.findById(timeSlotId)
+                    .orElseThrow(() -> new RuntimeException("Time slot not found"));
+            LocalTime slotEndTime = LocalTime.parse(timeSlot.getEndTime()); // Parse endTime from String to LocalTime
+            return slotEndTime.isBefore(currentTime);
+        }catch (Exception e){
+            throw new CommonException(e.getMessage());
+        }
+    }
 }

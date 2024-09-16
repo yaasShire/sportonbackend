@@ -3,5 +3,7 @@ package com.sporton.SportOn.entity;
 public enum BookingStatus {
     Pending,
     Confirmed,
-    Canceled
+    Canceled,
+    Expired,   // New status for expired bookings
+    Completed
 }

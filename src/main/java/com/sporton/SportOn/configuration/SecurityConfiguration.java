@@ -83,7 +83,12 @@ public class SecurityConfiguration {
         .requestMatchers(HttpMethod.GET, "/api/v1/booking/getBookingByProviderId").hasAnyAuthority(PROVIDER_READ.getPermission(), ADMIN_READ.getPermission())
         .requestMatchers(HttpMethod.GET, "/api/v1/booking/getTop10NewOrders").hasAnyAuthority(PROVIDER_READ.getPermission(), ADMIN_READ.getPermission())
         .requestMatchers(HttpMethod.GET, "/api/v1/booking/getPendingOrders").hasAnyAuthority(PROVIDER_READ.getPermission(), ADMIN_READ.getPermission())
-        .requestMatchers(HttpMethod.GET, "/api/v1/booking/getConfirmedOrders").hasAnyAuthority(PROVIDER_READ.getPermission(), ADMIN_READ.getPermission())
+        .requestMatchers(HttpMethod.GET, "/api/v1/booking/getCompletedOrders").hasAnyAuthority(PROVIDER_READ.getPermission(), ADMIN_READ.getPermission())
+        .requestMatchers(HttpMethod.GET, "/api/v1/booking/getExpiredOrders").hasAnyAuthority(PROVIDER_READ.getPermission(), ADMIN_READ.getPermission())
+
+
+
+            .requestMatchers(HttpMethod.GET, "/api/v1/booking/getConfirmedOrders").hasAnyAuthority(PROVIDER_READ.getPermission(), ADMIN_READ.getPermission())
         .requestMatchers(HttpMethod.GET, "/api/v1/booking/getCancelledOrders").hasAnyAuthority(PROVIDER_READ.getPermission(), ADMIN_READ.getPermission())
         .requestMatchers(HttpMethod.GET, "/api/v1/booking/getNumberOfTodayOrders").hasAnyAuthority(PROVIDER_READ.getPermission(), ADMIN_READ.getPermission())
         .requestMatchers(HttpMethod.GET, "/api/v1/booking/getNumberOfTodayMatches").hasAnyAuthority(PROVIDER_READ.getPermission(), ADMIN_READ.getPermission())

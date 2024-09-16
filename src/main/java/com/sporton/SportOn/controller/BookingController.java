@@ -64,19 +64,6 @@ public class BookingController {
         }
     }
 
-//        @GetMapping("/getBookingByCustomerId")
-//    public List<Booking> getBookingByCustomerId(
-//            @RequestHeader("Authorization") String authorizationHeader
-//    ) throws CommonException {
-//        try {
-//            String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
-//            String phoneNumber = jwtService.extractUsername(token);
-//            return bookingService.getBookingByCustomerId(phoneNumber);
-//        }catch (Exception e){
-//            throw new CommonException(e.getMessage());
-//        }
-//    }
-
     @GetMapping("/getBookingByCustomerId")
     public List<BookedVenueResponseDTO> getBookingByCustomerId(
             @RequestHeader("Authorization") String authorizationHeader,
@@ -144,6 +131,36 @@ public class BookingController {
             String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
             String phoneNumber = jwtService.extractUsername(token);
             return bookingService.getPendingOrders(phoneNumber, page, size);
+        }catch (Exception e){
+            throw new CommonException(e.getMessage());
+        }
+    }
+
+    @GetMapping("/getExpiredOrders")
+    public CommonResponseModel getExpiredOrders(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size
+    ) throws CommonException {
+        try {
+            String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+            String phoneNumber = jwtService.extractUsername(token);
+            return bookingService.getExpiredOrders(phoneNumber, page, size);
+        }catch (Exception e){
+            throw new CommonException(e.getMessage());
+        }
+    }
+
+    @GetMapping("/getCompletedOrders")
+    public CommonResponseModel getCompletedOrders(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size
+    ) throws CommonException {
+        try {
+            String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+            String phoneNumber = jwtService.extractUsername(token);
+            return bookingService.getCompletedOrders(phoneNumber, page, size);
         }catch (Exception e){
             throw new CommonException(e.getMessage());
         }

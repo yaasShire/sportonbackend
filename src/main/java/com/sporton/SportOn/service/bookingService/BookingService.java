@@ -28,6 +28,9 @@ public interface BookingService {
     CommonResponseModel getNumberOfNewOrders(String phoneNumber, Integer page, Integer size) throws CommonException;
 
     CommonResponseModel getPendingOrders(String phoneNumber, Integer page, Integer size) throws CommonException;
+    CommonResponseModel getExpiredOrders(String phoneNumber, Integer page, Integer size) throws CommonException;
+    CommonResponseModel getCompletedOrders(String phoneNumber, Integer page, Integer size) throws CommonException;
+
 
     CommonResponseModel getConfirmedOrders(String phoneNumber , Integer page, Integer size) throws CommonException;
 

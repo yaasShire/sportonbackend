@@ -500,6 +500,176 @@ public class BookingServiceImpl implements BookingService{
     }
 
     @Override
+    public CommonResponseModel getExpiredOrders(String phoneNumber, Integer page, Integer size) throws CommonException {
+        try {
+            Optional<AppUser> optionalAppUser = appUserRepository.findByPhoneNumber(phoneNumber);
+            if (optionalAppUser.isEmpty()) {
+                throw new CommonException("User with phone number " + phoneNumber + " does not exist");
+            }
+            Pageable pageable = PageRequest.of(page, size, Sort.by("bookingDate").descending());
+
+            Optional<List<Booking>> allBookings = bookingRepository.findByProviderId(pageable, optionalAppUser.get().getId());
+            List<Booking> pendingBookings = new ArrayList<>();
+
+            for (Booking booking : allBookings.get()) {
+                if (booking.getStatus() == BookingStatus.Expired) {
+                    pendingBookings.add(booking);
+                }
+            }
+
+            if (pendingBookings.isEmpty()) {
+                return CommonResponseModel.builder()
+                        .status(HttpStatus.OK)
+                        .message("No expired orders found")
+                        .data(Collections.emptyList())
+                        .build();
+            }
+
+            List<ProviderOrderResponseDTO> pendingOrders = pendingBookings.stream()
+                    .map(booking -> {
+                        Venue venue = booking.getVenue();
+                        Court court = null;
+                        try {
+                            court = courtRepository.findById(booking.getCourtId())
+                                    .orElseThrow(() -> new CommonException("Court with id " + booking.getCourtId() + " does not exist"));
+                        } catch (CommonException e) {
+                            throw new RuntimeException(e);
+                        }
+
+                        TimeSlot timeSlot = null;
+                        try {
+                            timeSlot = timeSlotRepository.findById(booking.getTimeSlotId())
+                                    .orElseThrow(() -> new CommonException("Time slot with id " + booking.getTimeSlotId() + " does not exist"));
+                        } catch (CommonException e) {
+                            throw new RuntimeException(e);
+                        }
+
+                        String firstImage = venue.getImages() != null && !venue.getImages().isEmpty() ? venue.getImages().get(0) : null;
+
+                        Optional<AppUser> bookingUser = appUserRepository.findById(booking.getUserId());
+                        if (bookingUser.isEmpty()) {
+                            try {
+                                throw new CommonException("User with id " + booking.getUserId() + " does not exist");
+                            } catch (CommonException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                        AppUser user = bookingUser.get();
+
+                        return ProviderOrderResponseDTO.builder()
+                                .venueId(venue.getId())
+                                .orderId(booking.getId())
+                                .venueName(venue.getName())
+                                .bookingDate(booking.getBookingDate())
+                                .matchDate(booking.getMatchDate())
+                                .courtName(court.getName())
+                                .userPhoneNumber(user.getPhoneNumber())
+                                .userName(user.getFullName())
+                                .startTime(timeSlot.getStartTime())
+                                .endTime(timeSlot.getEndTime())
+                                .totalPrice(booking.getTotalPrice())
+                                .status(booking.getStatus())
+                                .userProfileImage(user.getProfileImage())
+                                .build();
+                    })
+                    .collect(Collectors.toList());
+
+            return CommonResponseModel.builder()
+                    .status(HttpStatus.OK)
+                    .message("Pending orders retrieved successfully")
+                    .data(pendingOrders)
+                    .build();
+        } catch (Exception e) {
+            throw new CommonException(e.getMessage());
+        }
+    }
+
+    @Override
+    public CommonResponseModel getCompletedOrders(String phoneNumber, Integer page, Integer size) throws CommonException {
+        try {
+            Optional<AppUser> optionalAppUser = appUserRepository.findByPhoneNumber(phoneNumber);
+            if (optionalAppUser.isEmpty()) {
+                throw new CommonException("User with phone number " + phoneNumber + " does not exist");
+            }
+            Pageable pageable = PageRequest.of(page, size, Sort.by("bookingDate").descending());
+
+            Optional<List<Booking>> allBookings = bookingRepository.findByProviderId(pageable, optionalAppUser.get().getId());
+            List<Booking> pendingBookings = new ArrayList<>();
+
+            for (Booking booking : allBookings.get()) {
+                if (booking.getStatus() == BookingStatus.Completed) {
+                    pendingBookings.add(booking);
+                }
+            }
+
+            if (pendingBookings.isEmpty()) {
+                return CommonResponseModel.builder()
+                        .status(HttpStatus.OK)
+                        .message("No completed orders found")
+                        .data(Collections.emptyList())
+                        .build();
+            }
+
+            List<ProviderOrderResponseDTO> pendingOrders = pendingBookings.stream()
+                    .map(booking -> {
+                        Venue venue = booking.getVenue();
+                        Court court = null;
+                        try {
+                            court = courtRepository.findById(booking.getCourtId())
+                                    .orElseThrow(() -> new CommonException("Court with id " + booking.getCourtId() + " does not exist"));
+                        } catch (CommonException e) {
+                            throw new RuntimeException(e);
+                        }
+
+                        TimeSlot timeSlot = null;
+                        try {
+                            timeSlot = timeSlotRepository.findById(booking.getTimeSlotId())
+                                    .orElseThrow(() -> new CommonException("Time slot with id " + booking.getTimeSlotId() + " does not exist"));
+                        } catch (CommonException e) {
+                            throw new RuntimeException(e);
+                        }
+
+                        String firstImage = venue.getImages() != null && !venue.getImages().isEmpty() ? venue.getImages().get(0) : null;
+
+                        Optional<AppUser> bookingUser = appUserRepository.findById(booking.getUserId());
+                        if (bookingUser.isEmpty()) {
+                            try {
+                                throw new CommonException("User with id " + booking.getUserId() + " does not exist");
+                            } catch (CommonException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                        AppUser user = bookingUser.get();
+
+                        return ProviderOrderResponseDTO.builder()
+                                .venueId(venue.getId())
+                                .orderId(booking.getId())
+                                .venueName(venue.getName())
+                                .bookingDate(booking.getBookingDate())
+                                .matchDate(booking.getMatchDate())
+                                .courtName(court.getName())
+                                .userPhoneNumber(user.getPhoneNumber())
+                                .userName(user.getFullName())
+                                .startTime(timeSlot.getStartTime())
+                                .endTime(timeSlot.getEndTime())
+                                .totalPrice(booking.getTotalPrice())
+                                .status(booking.getStatus())
+                                .userProfileImage(user.getProfileImage())
+                                .build();
+                    })
+                    .collect(Collectors.toList());
+
+            return CommonResponseModel.builder()
+                    .status(HttpStatus.OK)
+                    .message("Pending orders retrieved successfully")
+                    .data(pendingOrders)
+                    .build();
+        } catch (Exception e) {
+            throw new CommonException(e.getMessage());
+        }
+    }
+
+    @Override
     public CommonResponseModel getConfirmedOrders(String phoneNumber, Integer page, Integer size) throws CommonException {
         try {
             Optional<AppUser> optionalAppUser = appUserRepository.findByPhoneNumber(phoneNumber);

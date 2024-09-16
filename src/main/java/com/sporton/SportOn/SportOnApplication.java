@@ -1,9 +1,15 @@
 package com.sporton.SportOn;
 
+import com.sporton.SportOn.entity.AppUser;
+import com.sporton.SportOn.entity.Role;
+import com.sporton.SportOn.repository.AppUserRepository;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.io.IOException;
 import java.net.URI;
@@ -67,4 +73,31 @@ public class SportOnApplication {
 		// Example assumes using simple string manipulation
 		return resultJSON.substring(resultJSON.indexOf("\"access_token\":\"") + 16, resultJSON.indexOf("\",\""));
 	}
+
+	@Bean
+	CommandLineRunner initAdminUser(AppUserRepository appUserRepository, PasswordEncoder passwordEncoder) {
+		return args -> {
+			String adminPhoneNumber = "612518368";
+
+			// Check if admin user already exists
+			if (appUserRepository.findByPhoneNumber(adminPhoneNumber).isEmpty()) {
+				AppUser adminUser = AppUser.builder()
+						.fullName("Yusuf Ahmed Shire")
+						.phoneNumber(adminPhoneNumber)
+						.email("yusufshire58@gmail.com")
+						.password(passwordEncoder.encode("12345678"))
+						.role(Role.ADMIN)
+						.joinedDate(java.time.LocalDate.now().toString())
+						.approved(true)
+						.build();
+
+				// Save admin user to the database
+				appUserRepository.save(adminUser);
+				System.out.println("Admin user created");
+			} else {
+				System.out.println("Admin user already exists");
+			}
+		};
+	}
+
 }
